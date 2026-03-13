@@ -1,6 +1,6 @@
 package pollub.karaokeapp.model.song;
 
-import pollub.karaokeapp.prototype.Prototype;
+import pollub.karaokeapp.Week2.prototype.Prototype;
 
 /**
  * Tydzień 2, Wzorzec Prototype 2

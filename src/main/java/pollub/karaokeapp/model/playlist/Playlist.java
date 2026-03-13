@@ -1,7 +1,7 @@
 package pollub.karaokeapp.model.playlist;
 
 import pollub.karaokeapp.model.song.Song;
-import pollub.karaokeapp.prototype.Prototype;
+import pollub.karaokeapp.Week2.prototype.Prototype;
 
 import java.util.ArrayList;
 import java.util.List;

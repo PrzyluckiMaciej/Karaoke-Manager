@@ -2,7 +2,7 @@ package pollub.karaokeapp.model.performance;
 
 import pollub.karaokeapp.model.song.Song;
 import pollub.karaokeapp.model.user.User;
-import pollub.karaokeapp.prototype.Prototype;
+import pollub.karaokeapp.Week2.prototype.Prototype;
 
 import java.util.ArrayList;
 import java.util.List;
