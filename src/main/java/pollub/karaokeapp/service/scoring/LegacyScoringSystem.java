@@ -1,4 +1,4 @@
-package pollub.karaokeapp.external;
+package pollub.karaokeapp.service.scoring;
 
 /**
  * Stary system oceniania używający innego formatu

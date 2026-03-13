@@ -1,4 +1,4 @@
-package pollub.karaokeapp.external;
+package pollub.karaokeapp.service.audio;
 
 public class BluetoothSpeaker implements ExternalInputDevice {
     @Override

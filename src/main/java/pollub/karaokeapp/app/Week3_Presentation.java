@@ -27,9 +27,8 @@ import pollub.karaokeapp.decorator.scoring.DifficultyMultiplierDecorator;
 import pollub.karaokeapp.decorator.scoring.TimePenaltyDecorator;
 import pollub.karaokeapp.decorator.user.ExperienceBoostDecorator;
 import pollub.karaokeapp.decorator.user.VocalSkillDecorator;
-import pollub.karaokeapp.external.ExternalSongAPI;
-import pollub.karaokeapp.external.LegacyScoringSystem;
-import pollub.karaokeapp.external.USBMicrophone;
+import pollub.karaokeapp.service.song.ExternalSongAPI;
+import pollub.karaokeapp.service.audio.USBMicrophone;
 import pollub.karaokeapp.model.performance.Performance;
 import pollub.karaokeapp.model.playlist.Playlist;
 import pollub.karaokeapp.model.song.Song;
@@ -81,8 +80,7 @@ public class Week3_Presentation {
 
         // Adapter 2: Legacy system oceniania
         System.out.println("\n--- Adapter 2: Adaptacja legacy systemu oceniania ---");
-        LegacyScoringSystem legacySystem = new LegacyScoringSystem();
-        ScoringStrategy adaptedScoring = new LegacyScoringAdapter(legacySystem, 80, 90, 75);
+        ScoringStrategy adaptedScoring = new LegacyScoringAdapter(80, 90, 75);
         int score = adaptedScoring.calculateScore(100);
         System.out.println("Wynik z legacy system (adaptowany): " + score);
 

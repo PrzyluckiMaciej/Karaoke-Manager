@@ -1,4 +1,4 @@
-package pollub.karaokeapp.external;
+package pollub.karaokeapp.service.song;
 
 /**
  * Symulacja zewnętrznego API dostarczającego piosenki w innym formacie

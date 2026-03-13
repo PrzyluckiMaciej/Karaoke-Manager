@@ -1,15 +1,15 @@
 package pollub.karaokeapp.adapter.song;
 
-import pollub.karaokeapp.external.ExternalSongAPI;
 import pollub.karaokeapp.model.song.Song;
+import pollub.karaokeapp.service.song.ExternalSongAPI;
 
 /**
- * Tydzień 3, Wzorzec Adapter 1
+ * Tydzień 3, Wzorzec Adapter 1 (Adapter obiektu)
  * Adapter dostosowujący zewnętrzne API do naszego modelu Song
  */
 public class ExternalSongAdapter extends Song {
 
-    private ExternalSongAPI externalAPI;
+    private final ExternalSongAPI externalAPI;
 
     public ExternalSongAdapter(ExternalSongAPI externalAPI) {
         super(
@@ -40,6 +40,10 @@ public class ExternalSongAdapter extends Song {
 
     private static int extractDifficulty(ExternalSongAPI api) {
         return Integer.parseInt(api.parseSongInfo()[4]);
+    }
+
+    public String getRawData() {
+        return externalAPI.getRawSongData();
     }
 }
 // Koniec, Tydzień 3, Wzorzec Adapter 1

@@ -1,4 +1,4 @@
-package pollub.karaokeapp.external;
+package pollub.karaokeapp.service.audio;
 
 /**
  * Różne zewnętrzne urządzenia wejściowe

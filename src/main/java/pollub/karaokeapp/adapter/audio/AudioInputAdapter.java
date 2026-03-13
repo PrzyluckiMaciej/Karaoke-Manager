@@ -1,15 +1,15 @@
 package pollub.karaokeapp.adapter.audio;
 
-import pollub.karaokeapp.external.ExternalInputDevice;
 import pollub.karaokeapp.service.audio.AudioInput;
+import pollub.karaokeapp.service.audio.ExternalInputDevice;
 
 /**
- * Tydzień 3, Wzorzec Adapter 4
+ * Tydzień 3, Wzorzec Adapter 4 (Adapter obiektu)
  * Adapter dostosowujący różne zewnętrzne urządzenia do jednolitego interfejsu AudioInput
  */
 public class AudioInputAdapter implements AudioInput {
 
-    private ExternalInputDevice device;
+    private final ExternalInputDevice device;
     private byte[] lastBuffer;
 
     public AudioInputAdapter(ExternalInputDevice device) {
@@ -18,10 +18,9 @@ public class AudioInputAdapter implements AudioInput {
 
     @Override
     public byte[] record(int durationSeconds) {
-        // Adaptacja: ciągłe odczytywanie danych przez określony czas
-        byte[] result = new byte[durationSeconds * device.getSampleRate() * 2]; // stereo 16-bit
+        byte[] result = new byte[durationSeconds * device.getSampleRate() * 2];
 
-        for (int i = 0; i < result.length; i += 6) { // uproszczenie
+        for (int i = 0; i < result.length; i += 6) {
             byte[] chunk = device.readAudioData();
             System.arraycopy(chunk, 0, result, i, Math.min(chunk.length, result.length - i));
         }
