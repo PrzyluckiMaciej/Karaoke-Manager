@@ -28,6 +28,10 @@ public class ScoreManagerSingleton {
         totalScore += score;
     }
 
+    public void resetScores() {
+        totalScore = 0;
+    }
+
     public int getTotalScore() {
         return totalScore;
     }
