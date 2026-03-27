@@ -1,40 +1,38 @@
 package pollub.karaokeapp.Week5.command.performance;
 
 import pollub.karaokeapp.Week5.command.KaraokeCommand;
-import pollub.karaokeapp.model.performance.Performance;
 
 /**
- * Tydzień 5, Wzorzec Command 4
- * Komenda ustawienia wyniku dla wykonania (z obsługą undo).
+ * Tydzień 5, Wzorzec Command 3
+ * Komenda ustawienia wyniku wykonania.
+ * Deleguje faktyczną logikę do Receivera (PerformanceJudge).
  */
 public class SetPerformanceScoreCommand implements KaraokeCommand {
 
-    private final Performance performance;
+    private final PerformanceJudge receiver;
     private final int newScore;
     private int previousScore;
 
-    public SetPerformanceScoreCommand(Performance performance, int newScore) {
-        this.performance = performance;
+    public SetPerformanceScoreCommand(PerformanceJudge receiver, int newScore) {
+        this.receiver = receiver;
         this.newScore = newScore;
     }
 
     @Override
     public void execute() {
-        previousScore = performance.getScore();
-        performance.setScore(newScore);
-        System.out.println("[PERF-CMD] Wynik ustawiony: " + previousScore + " → " + newScore
-                + " ('" + performance.getSong().getTitle() + "')");
+        previousScore = receiver.getCurrentScore();
+        receiver.applyScore(newScore);
     }
 
     @Override
     public void undo() {
-        performance.setScore(previousScore);
-        System.out.println("[PERF-CMD] Cofnięto zmianę wyniku: " + newScore + " → " + previousScore);
+        System.out.println("[PERF-CMD] Cofanie zmiany wyniku: " + newScore + " → " + previousScore);
+        receiver.applyScore(previousScore);
     }
 
     @Override
     public String getDescription() {
-        return "Ustaw wynik " + newScore + " dla '" + performance.getSong().getTitle() + "'";
+        return "Ustaw wynik " + newScore + " dla '" + receiver.getPerformance().getSong().getTitle() + "'";
     }
 }
-// Koniec, Tydzień 5, Wzorzec Command 4
+// Koniec, Tydzień 5, Wzorzec Command 3

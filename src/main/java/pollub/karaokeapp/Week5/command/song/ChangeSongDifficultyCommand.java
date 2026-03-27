@@ -1,39 +1,38 @@
 package pollub.karaokeapp.Week5.command.song;
 
 import pollub.karaokeapp.Week5.command.KaraokeCommand;
-import pollub.karaokeapp.model.song.Song;
 
 /**
- * Tydzień 5, Wzorzec Command 2
- * Komenda zmiany trudności piosenki (z obsługą undo).
+ * Tydzień 5, Wzorzec Command 1 (cd.)
+ * Komenda zmiany trudności piosenki.
+ * Deleguje faktyczną logikę do Receivera (SongEditor).
  */
 public class ChangeSongDifficultyCommand implements KaraokeCommand {
 
-    private final Song song;
+    private final SongEditor receiver;
     private final int newDifficulty;
     private int previousDifficulty;
 
-    public ChangeSongDifficultyCommand(Song song, int newDifficulty) {
-        this.song = song;
+    public ChangeSongDifficultyCommand(SongEditor receiver, int newDifficulty) {
+        this.receiver = receiver;
         this.newDifficulty = newDifficulty;
     }
 
     @Override
     public void execute() {
-        previousDifficulty = song.getDifficulty();
-        song.setDifficulty(newDifficulty);
-        System.out.println("[SONG-CMD] Trudność zmieniona: " + previousDifficulty + " → " + newDifficulty);
+        previousDifficulty = receiver.getCurrentDifficulty();
+        receiver.changeDifficulty(newDifficulty);
     }
 
     @Override
     public void undo() {
-        song.setDifficulty(previousDifficulty);
-        System.out.println("[SONG-CMD] Cofnięto zmianę trudności: " + newDifficulty + " → " + previousDifficulty);
+        System.out.println("[SONG-CMD] Cofanie zmiany trudności: " + newDifficulty + " → " + previousDifficulty);
+        receiver.changeDifficulty(previousDifficulty);
     }
 
     @Override
     public String getDescription() {
-        return "Zmiana trudności piosenki '" + song.getTitle() + "' na " + newDifficulty;
+        return "Zmiana trudności piosenki '" + receiver.getSong().getTitle() + "' na " + newDifficulty;
     }
 }
-// Koniec, Tydzień 5, Wzorzec Command 2
+// Koniec, Tydzień 5, Wzorzec Command 1 (cd.)

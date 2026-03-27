@@ -14,11 +14,13 @@ import pollub.karaokeapp.Week5.command.*;
 import pollub.karaokeapp.Week5.command.song.*;
 import pollub.karaokeapp.Week5.command.playlist.*;
 import pollub.karaokeapp.Week5.command.performance.*;
+import pollub.karaokeapp.Week5.command.user.*;
 
 import pollub.karaokeapp.Week5.interpreter.*;
 import pollub.karaokeapp.Week5.interpreter.filter.*;
 import pollub.karaokeapp.Week5.interpreter.scoring.*;
 
+import pollub.karaokeapp.Week5.iterator.*;
 import pollub.karaokeapp.Week5.iterator.playlist.*;
 import pollub.karaokeapp.Week5.iterator.performance.*;
 import pollub.karaokeapp.Week5.iterator.user.*;
@@ -62,16 +64,19 @@ public class Week5_Presentation {
 
         KaraokeCommandInvoker invoker = new KaraokeCommandInvoker();
 
-        // Command 1 & 2: Komendy piosenki (zmiana tytułu i trudności)
-        System.out.println("\n--- Command 1 & 2: Komendy edycji piosenki ---");
+        // Command 1: Komendy piosenki przez Receiver SongEditor
+        System.out.println("\n--- Command 1: Komendy edycji piosenki (Receiver: SongEditor) ---");
         Song song = new SongBuilder("Numb", "Linkin Park")
                 .setGenre("Rock").setDuration(187).setDifficulty(6).build();
+
+        // Receiver: SongEditor – zawiera całą logikę biznesową edycji piosenki
+        SongEditor songEditor = new SongEditor(song);
         System.out.println("Stan początkowy: " + song);
 
-        invoker.execute(new ChangeSongTitleCommand(song, "Numb (Encore)"));
+        invoker.execute(new ChangeSongTitleCommand(songEditor, "Numb (Encore)"));
         System.out.println("Po zmianie tytułu:    " + song);
 
-        invoker.execute(new ChangeSongDifficultyCommand(song, 8));
+        invoker.execute(new ChangeSongDifficultyCommand(songEditor, 8));
         System.out.println("Po zmianie trudności: " + song);
 
         invoker.undo();
@@ -80,33 +85,39 @@ public class Week5_Presentation {
         invoker.redo();
         System.out.println("Po ponowieniu (redo): " + song);
 
-        // Command 3: Komendy playlisty (dodaj / usuń piosenkę)
-        System.out.println("\n--- Command 3: Komendy zarządzania playlistą ---");
+        // Command 2: Komendy playlisty przez Receiver PlaylistManager
+        System.out.println("\n--- Command 2: Komendy zarządzania playlistą (Receiver: PlaylistManager) ---");
         Playlist playlist = new Playlist("Rock Classics");
         Song song2 = SongFactory.createSong("grunge", "Lithium", "Nirvana", 256, 4);
         Song song3 = SongFactory.createSong("pop", "Espresso", "Sabrina Carpenter", 175, 2);
 
-        invoker.execute(new AddSongToPlaylistCommand(playlist, song));
-        invoker.execute(new AddSongToPlaylistCommand(playlist, song2));
-        invoker.execute(new AddSongToPlaylistCommand(playlist, song3));
+        // Receiver: PlaylistManager – zawiera całą logikę biznesową operacji na playliście
+        PlaylistManager playlistManager = new PlaylistManager(playlist);
+
+        invoker.execute(new AddSongToPlaylistCommand(playlistManager, song));
+        invoker.execute(new AddSongToPlaylistCommand(playlistManager, song2));
+        invoker.execute(new AddSongToPlaylistCommand(playlistManager, song3));
         System.out.println("Playlista po dodaniu 3 piosenek: " + playlist.getSongs().size() + " piosenek");
 
-        invoker.execute(new RemoveSongFromPlaylistCommand(playlist, song3));
+        invoker.execute(new RemoveSongFromPlaylistCommand(playlistManager, song3));
         System.out.println("Po usunięciu Espresso:           " + playlist.getSongs().size() + " piosenki");
 
         invoker.undo(); // cofnij usunięcie
         System.out.println("Po cofnięciu usunięcia (undo):   " + playlist.getSongs().size() + " piosenek");
 
-        // Command 4: Wynik wykonania i makrokomenda
-        System.out.println("\n--- Command 4: Komenda wyniku i makrokomenda ---");
+        // Command 3: Wynik wykonania i makrokomenda przez Receiver PerformanceJudge
+        System.out.println("\n--- Command 3: Komenda wyniku i makrokomenda (Receiver: PerformanceJudge) ---");
         User user = UserFactory.createUser("premium", "Marek");
         Performance performance = new Performance(song, List.of(user), 0);
 
-        // Makrokomenda: kilka operacji jako jedna
+        // Receiver: PerformanceJudge – zawiera całą logikę biznesową oceniania wykonania
+        PerformanceJudge judge = new PerformanceJudge(performance);
+
+        // Makrokomenda: kilka operacji (każda z własnym Receiverem) jako jedna jednostka
         MacroCommand macro = new MacroCommand("Przygotuj Numer Otwarcia");
-        macro.addCommand(new ChangeSongTitleCommand(song, "Numb (Opening Night)"));
-        macro.addCommand(new ChangeSongDifficultyCommand(song, 9));
-        macro.addCommand(new SetPerformanceScoreCommand(performance, 95));
+        macro.addCommand(new ChangeSongTitleCommand(songEditor, "Numb (Opening Night)"));
+        macro.addCommand(new ChangeSongDifficultyCommand(songEditor, 9));
+        macro.addCommand(new SetPerformanceScoreCommand(judge, 95));
 
         invoker.execute(macro);
         System.out.println("Po makrokomendzie: " + song + " | wynik: " + performance.getScore());
@@ -116,6 +127,34 @@ public class Week5_Presentation {
 
         System.out.println("\nHistoria invoker'a (rozmiar): " + invoker.getHistorySize());
         invoker.printHistory();
+
+        // Command 4: Komendy edycji profilu użytkownika przez Receiver UserProfileEditor
+        System.out.println("\n--- Command 4: Edycja profilu użytkownika (Receiver: UserProfileEditor) ---");
+        User profileUser = UserFactory.createUser("standard", "Anonimowy");
+
+        // Receiver: UserProfileEditor – zawiera całą logikę biznesową edycji profilu
+        UserProfileEditor profileEditor = new UserProfileEditor(profileUser);
+        System.out.println("Stan początkowy: " + profileUser);
+
+        invoker.execute(new ChangeUserNicknameCommand(profileEditor, "RockStar99"));
+        System.out.println("Po zmianie nicku:    " + profileUser);
+
+        invoker.execute(new ChangeUserLevelCommand(profileEditor, 5));
+        System.out.println("Po zmianie poziomu:  " + profileUser);
+
+        invoker.execute(new AwardPointsCommand(profileEditor, 300, "Pierwsze wykonanie"));
+        invoker.execute(new AwardPointsCommand(profileEditor, 150, "Bonus weekendowy"));
+        System.out.println("Po przyznaniu punktów: " + profileUser);
+
+        invoker.undo(); // cofnij bonus weekendowy
+        System.out.println("Po cofnięciu bonusu: " + profileUser);
+
+        invoker.undo(); // cofnij pierwsze wykonanie
+        System.out.println("Po cofnięciu nagrody: " + profileUser);
+
+        invoker.undo(); // cofnij zmianę poziomu
+        invoker.undo(); // cofnij zmianę nicku
+        System.out.println("Po cofnięciu wszystkiego: " + profileUser);
 
         System.out.println("\n----------------------------------------------------------------------------------------------");
     }
@@ -212,7 +251,7 @@ public class Week5_Presentation {
         playlist.addSong(new SongBuilder("In Bloom", "Nirvana").setGenre("Grunge").setDuration(255).setDifficulty(5).build());
         playlist.addSong(new SongBuilder("Shake It Off", "Taylor Swift").setGenre("Pop").setDuration(219).setDifficulty(3).build());
 
-        // Iterator 1: Sekwencyjny i filtrujący iterator playlisty
+        // Iterator 2: Sekwencyjny i filtrujący iterator playlisty
         System.out.println("\n--- Iterator 2: Sekwencyjny i filtrujący iterator playlisty ---");
         PlaylistIterator seqIterator = new PlaylistIterator(playlist);
         System.out.println("Sekwencyjne przechodzenie po playliście:");
@@ -227,7 +266,7 @@ public class Week5_Presentation {
             System.out.println("  ✓ " + grungIter.next().getTitle());
         }
 
-        // Iterator 2: Historia wykonań (od najnowszego) i ranking
+        // Iterator 3: Historia wykonań (od najnowszego) i ranking
         System.out.println("\n--- Iterator 3: Iterator historii wykonań i rankingu ---");
         User user1 = UserFactory.createUser("standard", "Anna");
         User user2 = UserFactory.createUser("premium", "Jan");
@@ -252,7 +291,7 @@ public class Week5_Presentation {
             System.out.println("  #" + rank++ + " " + p.getSong().getTitle() + " – " + p.getScore() + " pkt");
         }
 
-        // Iterator 3 i 4: Ranking użytkowników i piosenki wg trudności
+        // Iterator 4: Ranking użytkowników i piosenki wg trudności
         System.out.println("\n--- Iterator 4: Ranking użytkowników i piosenki wg trudności ---");
         List<User> users = new ArrayList<>();
         users.add(new UserBuilder("Marek").setLevel(5).setPoints(1200).build());

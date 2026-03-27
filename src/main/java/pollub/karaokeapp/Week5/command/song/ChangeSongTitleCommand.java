@@ -1,34 +1,33 @@
 package pollub.karaokeapp.Week5.command.song;
 
 import pollub.karaokeapp.Week5.command.KaraokeCommand;
-import pollub.karaokeapp.model.song.Song;
 
 /**
  * Tydzień 5, Wzorzec Command 1
- * Komenda zmiany tytułu piosenki (z obsługą undo).
+ * Komenda zmiany tytułu piosenki.
+ * Deleguje faktyczną logikę do Receivera (SongEditor).
  */
 public class ChangeSongTitleCommand implements KaraokeCommand {
 
-    private final Song song;
+    private final SongEditor receiver;
     private final String newTitle;
     private String previousTitle;
 
-    public ChangeSongTitleCommand(Song song, String newTitle) {
-        this.song = song;
+    public ChangeSongTitleCommand(SongEditor receiver, String newTitle) {
+        this.receiver = receiver;
         this.newTitle = newTitle;
     }
 
     @Override
     public void execute() {
-        previousTitle = song.getTitle();
-        song.setTitle(newTitle);
-        System.out.println("[SONG-CMD] Tytuł zmieniony: '" + previousTitle + "' → '" + newTitle + "'");
+        previousTitle = receiver.getCurrentTitle();
+        receiver.changeTitle(newTitle);
     }
 
     @Override
     public void undo() {
-        song.setTitle(previousTitle);
-        System.out.println("[SONG-CMD] Cofnięto zmianę tytułu: '" + newTitle + "' → '" + previousTitle + "'");
+        System.out.println("[SONG-CMD] Cofanie zmiany tytułu: '" + newTitle + "' → '" + previousTitle + "'");
+        receiver.changeTitle(previousTitle);
     }
 
     @Override
