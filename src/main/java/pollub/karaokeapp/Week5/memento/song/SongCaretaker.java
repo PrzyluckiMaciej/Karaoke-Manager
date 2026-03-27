@@ -21,7 +21,6 @@ public class SongCaretaker {
         this.song = song;
     }
 
-    /** Zapisanie aktualnego stanu piosenki */
     public void save() {
         SongMemento memento = new SongMemento(
                 song.getTitle(), song.getArtist(),
@@ -31,7 +30,6 @@ public class SongCaretaker {
         logger.log("[SONG-MEMENTO] Zapisano stan: " + memento);
     }
 
-    /** Cofnięcie do poprzedniego stanu */
     public boolean undo() {
         if (history.isEmpty()) {
             logger.log("[SONG-MEMENTO] Brak historii do cofnięcia");

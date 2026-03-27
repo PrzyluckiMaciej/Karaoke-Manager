@@ -62,6 +62,7 @@ public class UserCaretaker {
         return true;
     }
 
+    /** Przywrócenie do konkretnej migawki */
     private void restore(UserMemento memento) {
         user.setNickname(memento.getNickname());
         user.setLevel(memento.getLevel());
