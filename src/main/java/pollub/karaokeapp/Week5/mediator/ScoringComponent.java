@@ -1,7 +1,7 @@
 package pollub.karaokeapp.Week5.mediator;
 
 /**
- * Tydzień 5, Wzorzec Mediator 3 (cd.)
+ * Tydzień 5, Wzorzec Mediator 4
  * Komponent punktacji – uczestnik mediatora.
  * Oblicza wynik i zgłasza go przez mediatora.
  */
@@ -28,4 +28,4 @@ public class ScoringComponent extends KaraokeColleague {
 
     public int getLastScore() { return lastScore; }
 }
-// Koniec, Tydzień 5, Wzorzec Mediator 3 (cd.)
+// Koniec, Tydzień 5, Wzorzec Mediator 4

@@ -1,7 +1,7 @@
 package pollub.karaokeapp.Week5.mediator;
 
 /**
- * Tydzień 5, Wzorzec Mediator 4
+ * Tydzień 5, Wzorzec Mediator 2
  * Komponent wyświetlania – uczestnik mediatora.
  * Obsługuje wyświetlanie tekstu, wyniku i powiadomień na ekranie.
  */
@@ -28,4 +28,4 @@ public class DisplayComponent extends KaraokeColleague {
         }
     }
 }
-// Koniec, Tydzień 5, Wzorzec Mediator 4
+// Koniec, Tydzień 5, Wzorzec Mediator 2

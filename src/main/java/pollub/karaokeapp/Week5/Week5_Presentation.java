@@ -546,7 +546,7 @@ public class Week5_Presentation {
     private static void demonstrateMediator() {
         System.out.println("\n----------------------------------- MEDIATOR -----------------------------------");
 
-        System.out.println("\n--- Mediator 1 & 2: Rejestracja komponentów i mediator sesji ---");
+        System.out.println("\n--- Mediator: Rejestracja komponentów i mediator sesji ---");
         KaraokeSessionMediator mediator = new KaraokeSessionMediator();
 
         AudioComponent        audio        = new AudioComponent();
@@ -559,8 +559,8 @@ public class Week5_Presentation {
         mediator.registerColleague("display",      display);
         mediator.registerColleague("notification", notification);
 
-        // Mediator 3 & 4: Przepływ sesji przez mediatora
-        System.out.println("\n--- Mediator 3 & 4: Zdarzenia sesji karaoke ---");
+        // Mediator: Przepływ sesji przez mediatora
+        System.out.println("\n--- Mediator: Zdarzenia sesji karaoke ---");
 
         System.out.println("\n[1] Użytkownik dołącza do sesji:");
         notification.userJoined("Freddie Mercury");

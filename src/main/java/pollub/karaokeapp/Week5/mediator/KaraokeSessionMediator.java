@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Tydzień 5, Wzorzec Mediator 2
+ * Tydzień 5, Wzorzec Mediator
  * Konkretny mediator zarządzający sesją karaoke.
  * Koordynuje zdarzenia między: AudioComponent, ScoringComponent,
  * DisplayComponent i NotificationComponent.
@@ -66,4 +66,4 @@ public class KaraokeSessionMediator implements KaraokeMediator {
         }
     }
 }
-// Koniec, Tydzień 5, Wzorzec Mediator 2
+// Koniec, Tydzień 5, Wzorzec Mediator

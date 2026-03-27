@@ -1,7 +1,7 @@
 package pollub.karaokeapp.Week5.mediator;
 
 /**
- * Tydzień 5, Wzorzec Mediator 3
+ * Tydzień 5, Wzorzec Mediator 1
  * Komponent audio – uczestnik mediatora.
  * Zarządza nagrywaniem i odtwarzaniem. Komunikuje się przez mediatora.
  */
@@ -44,4 +44,4 @@ public class AudioComponent extends KaraokeColleague {
     public boolean isRecording() { return isRecording; }
     public byte[] getLastRecording() { return lastRecording; }
 }
-// Koniec, Tydzień 5, Wzorzec Mediator 3
+// Koniec, Tydzień 5, Wzorzec Mediator 1

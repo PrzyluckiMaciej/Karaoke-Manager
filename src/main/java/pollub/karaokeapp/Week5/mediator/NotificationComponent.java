@@ -1,7 +1,7 @@
 package pollub.karaokeapp.Week5.mediator;
 
 /**
- * Tydzień 5, Wzorzec Mediator 4 (cd.)
+ * Tydzień 5, Wzorzec Mediator 3
  * Komponent powiadomień – uczestnik mediatora.
  * Wysyła powiadomienia e-mail/SMS po zdarzeniach sesji.
  */
@@ -35,4 +35,4 @@ public class NotificationComponent extends KaraokeColleague {
 
     public int getNotificationsSent() { return notificationsSent; }
 }
-// Koniec, Tydzień 5, Wzorzec Mediator 4 (cd.)
+// Koniec, Tydzień 5, Wzorzec Mediator 3

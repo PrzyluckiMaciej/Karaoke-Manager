@@ -1,7 +1,7 @@
 package pollub.karaokeapp.Week5.mediator;
 
 /**
- * Tydzień 5, Wzorzec Mediator 1 (cd.)
+ * Tydzień 5, Wzorzec Mediator
  * Klasa bazowa uczestnika (Colleague) systemu mediator.
  * Każdy komponent zna tylko mediatora, nie innych uczestników.
  */
@@ -24,4 +24,4 @@ public abstract class KaraokeColleague {
 
     public abstract void receive(String event, Object data);
 }
-// Koniec, Tydzień 5, Wzorzec Mediator 1 (cd.)
+// Koniec, Tydzień 5, Wzorzec Mediator
