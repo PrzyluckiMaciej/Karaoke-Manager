@@ -1,10 +1,10 @@
-package pollub.karaokeapp.Week5.interpreter.filter;
+package pollub.karaokeapp.Week5.interpreter.filter.logic;
 
-import pollub.karaokeapp.Week5.interpreter.SongFilterExpression;
+import pollub.karaokeapp.Week5.interpreter.filter.SongFilterExpression;
 import pollub.karaokeapp.model.song.Song;
 
 /**
- * Tydzień 5, Wzorzec Interpreter 3 (cd.)
+ * Tydzień 5, Wzorzec Interpreter 2
  * Nieterminalny – wyrażenie NOT negujące filtr.
  */
 public class NotFilterExpression implements SongFilterExpression {
@@ -25,4 +25,4 @@ public class NotFilterExpression implements SongFilterExpression {
         return "NOT(" + expression.getExpressionDescription() + ")";
     }
 }
-// Koniec, Tydzień 5, Wzorzec Interpreter 3 (cd.)
+// Koniec, Tydzień 5, Wzorzec Interpreter 2

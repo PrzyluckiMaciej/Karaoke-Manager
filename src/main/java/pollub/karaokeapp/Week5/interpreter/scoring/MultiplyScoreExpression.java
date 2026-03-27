@@ -1,7 +1,7 @@
 package pollub.karaokeapp.Week5.interpreter.scoring;
 
 /**
- * Tydzień 5, Wzorzec Interpreter 4 (cd.)
+ * Tydzień 5, Wzorzec Interpreter 3
  * Nieterminalny – mnożenie wyrażenia punktowego przez współczynnik trudności.
  */
 public class MultiplyScoreExpression implements ScoreExpression {
@@ -26,4 +26,4 @@ public class MultiplyScoreExpression implements ScoreExpression {
         return "(" + expression.getExpressionDescription() + " * " + multiplierLabel + "[" + multiplier + "])";
     }
 }
-// Koniec, Tydzień 5, Wzorzec Interpreter 4 (cd.)
+// Koniec, Tydzień 5, Wzorzec Interpreter 3

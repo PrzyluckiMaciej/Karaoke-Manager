@@ -1,10 +1,9 @@
 package pollub.karaokeapp.Week5.interpreter.filter;
 
-import pollub.karaokeapp.Week5.interpreter.SongFilterExpression;
 import pollub.karaokeapp.model.song.Song;
 
 /**
- * Tydzień 5, Wzorzec Interpreter 2 (cd.)
+ * Tydzień 5, Wzorzec Interpreter 1
  * Terminal – filtruje piosenki po zakresie trudności.
  */
 public class DifficultyRangeExpression implements SongFilterExpression {
@@ -27,4 +26,4 @@ public class DifficultyRangeExpression implements SongFilterExpression {
         return "trudność∈[" + minDifficulty + "," + maxDifficulty + "]";
     }
 }
-// Koniec, Tydzień 5, Wzorzec Interpreter 2 (cd.)
+// Koniec, Tydzień 5, Wzorzec Interpreter 1

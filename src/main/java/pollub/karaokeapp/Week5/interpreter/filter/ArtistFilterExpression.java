@@ -1,10 +1,9 @@
 package pollub.karaokeapp.Week5.interpreter.filter;
 
-import pollub.karaokeapp.Week5.interpreter.SongFilterExpression;
 import pollub.karaokeapp.model.song.Song;
 
 /**
- * Tydzień 5, Wzorzec Interpreter 2 (cd.)
+ * Tydzień 5, Wzorzec Interpreter 1
  * Terminal – filtruje piosenki po artyście.
  */
 public class ArtistFilterExpression implements SongFilterExpression {
@@ -25,4 +24,4 @@ public class ArtistFilterExpression implements SongFilterExpression {
         return "artysta='" + artist + "'";
     }
 }
-// Koniec, Tydzień 5, Wzorzec Interpreter 2 (cd.)
+// Koniec, Tydzień 5, Wzorzec Interpreter 1

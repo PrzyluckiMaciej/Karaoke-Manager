@@ -1,7 +1,7 @@
 package pollub.karaokeapp.Week5.interpreter.scoring;
 
 /**
- * Tydzień 5, Wzorzec Interpreter 4 (cd.)
+ * Tydzień 5, Wzorzec Interpreter 3
  * Terminal – stała wartość punktowa.
  */
 public class ConstantScoreExpression implements ScoreExpression {
@@ -24,4 +24,4 @@ public class ConstantScoreExpression implements ScoreExpression {
         return label + "(" + value + ")";
     }
 }
-// Koniec, Tydzień 5, Wzorzec Interpreter 4 (cd.)
+// Koniec, Tydzień 5, Wzorzec Interpreter 3

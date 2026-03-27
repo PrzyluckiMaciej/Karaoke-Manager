@@ -1,7 +1,7 @@
 package pollub.karaokeapp.Week5.interpreter.scoring;
 
 /**
- * Tydzień 5, Wzorzec Interpreter 4 (cd.)
+ * Tydzień 5, Wzorzec Interpreter 3
  * Nieterminalny – suma dwóch wyrażeń punktowych.
  */
 public class AddScoreExpression implements ScoreExpression {
@@ -24,4 +24,4 @@ public class AddScoreExpression implements ScoreExpression {
         return "(" + left.getExpressionDescription() + " + " + right.getExpressionDescription() + ")";
     }
 }
-// Koniec, Tydzień 5, Wzorzec Interpreter 4 (cd.)
+// Koniec, Tydzień 5, Wzorzec Interpreter 3

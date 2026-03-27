@@ -1,11 +1,11 @@
-package pollub.karaokeapp.Week5.interpreter.filter;
+package pollub.karaokeapp.Week5.interpreter.filter.logic;
 
-import pollub.karaokeapp.Week5.interpreter.SongFilterExpression;
+import pollub.karaokeapp.Week5.interpreter.filter.SongFilterExpression;
 import pollub.karaokeapp.model.song.Song;
 
 /**
- * Tydzień 5, Wzorzec Interpreter 3
- * Nieteminalny – wyrażenie AND łączące dwa filtry.
+ * Tydzień 5, Wzorzec Interpreter 2
+ * Nieterminalny – wyrażenie AND łączące dwa filtry.
  */
 public class AndFilterExpression implements SongFilterExpression {
 
@@ -27,4 +27,4 @@ public class AndFilterExpression implements SongFilterExpression {
         return "(" + left.getExpressionDescription() + " AND " + right.getExpressionDescription() + ")";
     }
 }
-// Koniec, Tydzień 5, Wzorzec Interpreter 3
+// Koniec, Tydzień 5, Wzorzec Interpreter 2

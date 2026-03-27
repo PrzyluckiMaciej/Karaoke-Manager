@@ -5,6 +5,10 @@ import pollub.karaokeapp.Week2.builder.user.UserBuilder;
 import pollub.karaokeapp.Week2.factory.song.SongFactory;
 import pollub.karaokeapp.Week2.factory.user.UserFactory;
 import pollub.karaokeapp.Week2.singleton.LoggerSingleton;
+import pollub.karaokeapp.Week5.interpreter.filter.logic.AndFilterExpression;
+import pollub.karaokeapp.Week5.interpreter.filter.logic.NotFilterExpression;
+import pollub.karaokeapp.Week5.interpreter.filter.logic.OrFilterExpression;
+import pollub.karaokeapp.Week5.interpreter.playlist.*;
 import pollub.karaokeapp.model.performance.Performance;
 import pollub.karaokeapp.model.playlist.Playlist;
 import pollub.karaokeapp.model.song.Song;
@@ -16,11 +20,9 @@ import pollub.karaokeapp.Week5.command.playlist.*;
 import pollub.karaokeapp.Week5.command.performance.*;
 import pollub.karaokeapp.Week5.command.user.*;
 
-import pollub.karaokeapp.Week5.interpreter.*;
 import pollub.karaokeapp.Week5.interpreter.filter.*;
 import pollub.karaokeapp.Week5.interpreter.scoring.*;
 
-import pollub.karaokeapp.Week5.iterator.*;
 import pollub.karaokeapp.Week5.iterator.playlist.*;
 import pollub.karaokeapp.Week5.iterator.performance.*;
 import pollub.karaokeapp.Week5.iterator.user.*;
@@ -49,6 +51,7 @@ public class Week5_Presentation {
 
         demonstrateCommand();
         demonstrateInterpreter();
+        demonstrateSmartPlaylistInterpreter();
         demonstrateIterator();
         demonstrateMediator();
         demonstrateMemento();
@@ -174,8 +177,8 @@ public class Week5_Presentation {
         songs.add(new SongBuilder("Master of Puppets", "Metallica").setGenre("Rock").setDuration(515).setDifficulty(9).build());
         songs.add(new SongBuilder("Shake It Off", "Taylor Swift").setGenre("Pop").setDuration(219).setDifficulty(3).build());
 
-        // Interpreter 1 & 2: Wyrażenia terminalne (proste filtry)
-        System.out.println("\n--- Interpreter 1 & 2: Terminale – proste filtry ---");
+        // Interpreter 1: Wyrażenia terminalne (proste filtry)
+        System.out.println("\n--- Interpreter 1: Terminale – proste filtry ---");
         SongFilterExpression rockFilter = new GenreFilterExpression("Rock");
         SongFilterExpression easyFilter = new DifficultyRangeExpression(1, 4);
         SongFilterExpression nirFilter  = new ArtistFilterExpression("Nirvana");
@@ -188,7 +191,7 @@ public class Week5_Presentation {
         songs.stream().filter(easyFilter::interpret)
                 .forEach(s -> System.out.println("  ✓ " + s.getTitle() + " (trudność " + s.getDifficulty() + ")"));
 
-        // Interpreter 3: Wyrażenia nieterminalne (AND, OR, NOT)
+        // Interpreter 2: Wyrażenia nieterminalne (AND, OR, NOT)
         System.out.println("\n--- Interpreter 3: Nieterminale – złożone wyrażenia logiczne ---");
 
         SongFilterExpression grungeMedium = new AndFilterExpression(
@@ -213,7 +216,7 @@ public class Week5_Presentation {
         songs.stream().filter(complexQuery::interpret)
                 .forEach(s -> System.out.println("  ✓ " + s.getTitle() + " – " + s.getArtist()));
 
-        // Interpreter 4: Język reguł punktacyjnych
+        // Interpreter 3: Język reguł punktacyjnych
         System.out.println("\n--- Interpreter 4: Język reguł punktacyjnych ---");
 
         // Reguła: BONUS[Publiczność+50](BaseScore(80) + DifficultyBonus(30)) * Multiplier[1.2]
@@ -233,6 +236,226 @@ public class Week5_Presentation {
         );
         System.out.println("Prosta reguła: " + simpleRule.getExpressionDescription()
                 + " = " + simpleRule.interpret() + " pkt");
+
+        System.out.println("\n----------------------------------------------------------------------------------------------");
+    }
+
+    private static void demonstrateSmartPlaylistInterpreter() {
+        System.out.println("\n----------------------------------- SMART PLAYLIST INTERPRETER -----------------------------------");
+
+        // Pula piosenek do testów
+        List<Song> allSongs = new ArrayList<>();
+        allSongs.add(new SongBuilder("Numb", "Linkin Park").setGenre("Rock").setDuration(187).setDifficulty(6).build());
+        allSongs.add(new SongBuilder("Lithium", "Nirvana").setGenre("Grunge").setDuration(256).setDifficulty(4).build());
+        allSongs.add(new SongBuilder("Espresso", "Sabrina Carpenter").setGenre("Pop").setDuration(175).setDifficulty(2).build());
+        allSongs.add(new SongBuilder("In Bloom", "Nirvana").setGenre("Grunge").setDuration(255).setDifficulty(5).build());
+        allSongs.add(new SongBuilder("Master of Puppets", "Metallica").setGenre("Rock").setDuration(515).setDifficulty(9).build());
+        allSongs.add(new SongBuilder("Shake It Off", "Taylor Swift").setGenre("Pop").setDuration(219).setDifficulty(3).build());
+        allSongs.add(new SongBuilder("Bohemian Rhapsody", "Queen").setGenre("Rock").setDuration(355).setDifficulty(8).build());
+        allSongs.add(new SongBuilder("Smells Like Teen Spirit", "Nirvana").setGenre("Grunge").setDuration(301).setDifficulty(7).build());
+        allSongs.add(new SongBuilder("Blinding Lights", "The Weeknd").setGenre("Pop").setDuration(200).setDifficulty(4).build());
+        allSongs.add(new SongBuilder("Wonderwall", "Oasis").setGenre("Rock").setDuration(258).setDifficulty(3).build());
+        allSongs.add(new SongBuilder("Seven Nation Army", "The White Stripes").setGenre("Rock").setDuration(232).setDifficulty(4).build());
+        allSongs.add(new SongBuilder("Wish You Were Here", "Pink Floyd").setGenre("Rock").setDuration(334).setDifficulty(4).build());
+        allSongs.add(new SongBuilder("Zombie", "The Cranberries").setGenre("Rock").setDuration(307).setDifficulty(5).build());
+        allSongs.add(new SongBuilder("Creep", "Radiohead").setGenre("Rock").setDuration(235).setDifficulty(4).build());
+
+        System.out.println("\n--- Interpreter 5: Inteligentne playlisty ---");
+        System.out.println("Dostępne piosenki: " + allSongs.size());
+
+        // Reguła 1: Rockowa rozgrzewka (łatwe rockowe piosenki)
+        SongFilterExpression warmUpCondition = new AndFilterExpression(
+                new GenreFilterExpression("Rock"),
+                new DifficultyRangeExpression(1, 5)
+        );
+
+        ScoreExpression warmUpScoring = new AddScoreExpression(
+                new ConstantScoreExpression(100, "BaseRock"),
+                new ConstantScoreExpression(30, "WarmUpBonus")
+        );
+
+        SmartPlaylistRule warmUpPlaylist = new SmartPlaylistRule(
+                "Rockowa Rozgrzewka",
+                warmUpCondition,
+                warmUpScoring,
+                5
+        );
+
+        System.out.println("\n" + warmUpPlaylist.getRuleDescription());
+        Playlist rockWarmUp = warmUpPlaylist.generatePlaylist(allSongs);
+        System.out.println("Wygenerowana playlista (" + rockWarmUp.getSongs().size() + " piosenek):");
+        if (rockWarmUp.getSongs().isEmpty()) {
+            System.out.println("  ⚠️ Brak piosenek spełniających kryteria!");
+        } else {
+            for (Song s : rockWarmUp.getSongs()) {
+                System.out.println("  🎸 " + s.getTitle() + " - " + s.getArtist() +
+                        " (trudność: " + s.getDifficulty() + ")");
+            }
+        }
+
+        // Reguła 2: Zaawansowane wyzwanie
+        SongFilterExpression challengeCondition = new AndFilterExpression(
+                new OrFilterExpression(
+                        new GenreFilterExpression("Rock"),
+                        new GenreFilterExpression("Grunge")
+                ),
+                new DifficultyRangeExpression(7, 10)
+        );
+
+        ScoreExpression challengeScoring = new MultiplyScoreExpression(
+                new ConstantScoreExpression(150, "BaseChallenge"),
+                1.5,
+                "DifficultyMultiplier"
+        );
+
+        SmartPlaylistRule challengePlaylist = new SmartPlaylistRule(
+                "Zaawansowane Wyzwanie",
+                challengeCondition,
+                challengeScoring,
+                3
+        );
+
+        System.out.println("\n" + challengePlaylist.getRuleDescription());
+        Playlist challenge = challengePlaylist.generatePlaylist(allSongs);
+        System.out.println("Wygenerowana playlista (" + challenge.getSongs().size() + " piosenek):");
+        for (Song s : challenge.getSongs()) {
+            System.out.println("  🔥 " + s.getTitle() + " - " + s.getArtist() +
+                    " (trudność: " + s.getDifficulty() + ", czas: " + s.getDuration() + "s)");
+        }
+
+        // Reguła 3: Pop mix
+        SongFilterExpression popCondition = new AndFilterExpression(
+                new GenreFilterExpression("Pop"),
+                new NotFilterExpression(new ArtistFilterExpression("Taylor Swift"))
+        );
+
+        ScoreExpression popScoring = new AddScoreExpression(
+                new ConstantScoreExpression(80, "BasePop"),
+                new BonusScoreExpression(
+                        new ConstantScoreExpression(0, "PopularityBonus"),
+                        25,
+                        "Trending"
+                )
+        );
+
+        SmartPlaylistRule popPlaylist = new SmartPlaylistRule(
+                "Pop Mix (bez Taylor Swift)",
+                popCondition,
+                popScoring,
+                3
+        );
+
+        System.out.println("\n" + popPlaylist.getRuleDescription());
+        Playlist popMix = popPlaylist.generatePlaylist(allSongs);
+        System.out.println("Wygenerowana playlista (" + popMix.getSongs().size() + " piosenek):");
+        for (Song s : popMix.getSongs()) {
+            System.out.println("  🎤 " + s.getTitle() + " - " + s.getArtist());
+        }
+
+        // Kompozyt reguł
+        System.out.println("\n--- Kompozyt reguł: Mega Playlista Wieczoru ---");
+        CompositePlaylistRule megaPlaylist = new CompositePlaylistRule("Mega Wieczór Karaoke");
+        megaPlaylist.addRule(warmUpPlaylist);
+        megaPlaylist.addRule(challengePlaylist);
+        megaPlaylist.addRule(popPlaylist);
+
+        System.out.println(megaPlaylist.getRuleDescription());
+        Playlist eveningPlaylist = megaPlaylist.generatePlaylist(allSongs);
+        System.out.println("\nKompletna playlista wieczoru (" + eveningPlaylist.getSongs().size() + " piosenek):");
+        for (Song s : eveningPlaylist.getSongs()) {
+            System.out.println("  ✨ " + s.getTitle() + " - " + s.getArtist());
+        }
+
+        // Adaptacyjna playlista
+        System.out.println("\n--- Adaptacyjna playlista (dostosowana do poziomu użytkownika) ---");
+        User beginner = new UserBuilder("Początkujący").setLevel(2).setPoints(150).build();
+        User intermediate = new UserBuilder("Średniak").setLevel(5).setPoints(800).build();
+        User advanced = new UserBuilder("Ekspert").setLevel(9).setPoints(2500).build();
+
+        ScoreExpression adaptiveScoring = new ConstantScoreExpression(100, "AdaptiveScore");
+
+        AdaptivePlaylistRule beginnerPlaylist = new AdaptivePlaylistRule(
+                "Adaptacyjna", beginner, adaptiveScoring, 4
+        );
+
+        System.out.println("\n" + beginnerPlaylist.getRuleDescription());
+        Playlist beginnerList = beginnerPlaylist.generatePlaylist(allSongs);
+        System.out.println("Playlista dla początkującego (" + beginnerList.getSongs().size() + " piosenek):");
+        for (Song s : beginnerList.getSongs()) {
+            System.out.println("  👤 " + s.getTitle() + " - " + s.getArtist() +
+                    " (trudność: " + s.getDifficulty() + ")");
+        }
+
+        AdaptivePlaylistRule intermediatePlaylist = new AdaptivePlaylistRule(
+                "Adaptacyjna", intermediate, adaptiveScoring, 4
+        );
+
+        System.out.println("\n" + intermediatePlaylist.getRuleDescription());
+        Playlist intermediateList = intermediatePlaylist.generatePlaylist(allSongs);
+        System.out.println("Playlista dla średniozaawansowanego (" + intermediateList.getSongs().size() + " piosenek):");
+        for (Song s : intermediateList.getSongs()) {
+            System.out.println("  👤 " + s.getTitle() + " - " + s.getArtist() +
+                    " (trudność: " + s.getDifficulty() + ")");
+        }
+
+        AdaptivePlaylistRule advancedPlaylist = new AdaptivePlaylistRule(
+                "Adaptacyjna", advanced, adaptiveScoring, 4
+        );
+
+        System.out.println("\n" + advancedPlaylist.getRuleDescription());
+        Playlist advancedList = advancedPlaylist.generatePlaylist(allSongs);
+        System.out.println("Playlista dla eksperta (" + advancedList.getSongs().size() + " piosenek):");
+        for (Song s : advancedList.getSongs()) {
+            System.out.println("  👤 " + s.getTitle() + " - " + s.getArtist() +
+                    " (trudność: " + s.getDifficulty() + ")");
+        }
+
+        // Reguła z limitem czasowym
+        System.out.println("\n--- Reguła z limitem czasowym (30 minut) ---");
+        TimeBasedPlaylistRule timeLimited = new TimeBasedPlaylistRule(
+                "Wieczór Rockowy",
+                new GenreFilterExpression("Rock"),
+                new ConstantScoreExpression(100, "RockScore"),
+                1800 // 30 minut = 1800 sekund
+        );
+
+        System.out.println(timeLimited.getRuleDescription());
+        Playlist timeBasedList = timeLimited.generatePlaylist(allSongs);
+        int totalDuration = 0;
+        for (Song s : timeBasedList.getSongs()) {
+            totalDuration += s.getDuration();
+        }
+        System.out.println("Wygenerowana playlista (" + timeBasedList.getSongs().size() +
+                " piosenek, łączny czas: " + (totalDuration / 60) + " min " +
+                (totalDuration % 60) + " s):");
+        for (Song s : timeBasedList.getSongs()) {
+            System.out.println("  ⏱️ " + s.getTitle() + " - " + s.getArtist() +
+                    " (" + (s.getDuration() / 60) + ":" + String.format("%02d", s.getDuration() % 60) + ")");
+        }
+
+        // Ranking piosenek według punktacji
+        System.out.println("\n--- Ranking piosenek rockowych (według reguły punktowej) ---");
+        ScoreExpression rankingScoring = new MultiplyScoreExpression(
+                new ConstantScoreExpression(100, "Base"),
+                1.2,
+                "PopularityMultiplier"
+        );
+
+        SongFilterExpression rockOnly = new GenreFilterExpression("Rock");
+        SmartPlaylistRule rankingPlaylist = new SmartPlaylistRule(
+                "Top Rock Hits",
+                rockOnly,
+                rankingScoring,
+                10
+        );
+
+        Playlist rankedRock = rankingPlaylist.generatePlaylist(allSongs);
+        System.out.println("Ranking rockowych hitów:");
+        int rank = 1;
+        for (Song s : rankedRock.getSongs()) {
+            System.out.println("  #" + rank++ + " " + s.getTitle() + " - " + s.getArtist() +
+                    " (trudność: " + s.getDifficulty() + ")");
+        }
 
         System.out.println("\n----------------------------------------------------------------------------------------------");
     }

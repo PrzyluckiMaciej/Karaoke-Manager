@@ -1,10 +1,9 @@
 package pollub.karaokeapp.Week5.interpreter.filter;
 
-import pollub.karaokeapp.Week5.interpreter.SongFilterExpression;
 import pollub.karaokeapp.model.song.Song;
 
 /**
- * Tydzień 5, Wzorzec Interpreter 2
+ * Tydzień 5, Wzorzec Interpreter 1
  * Terminal – filtruje piosenki po gatunku.
  */
 public class GenreFilterExpression implements SongFilterExpression {
@@ -25,4 +24,4 @@ public class GenreFilterExpression implements SongFilterExpression {
         return "gatunek='" + genre + "'";
     }
 }
-// Koniec, Tydzień 5, Wzorzec Interpreter 2
+// Koniec, Tydzień 5, Wzorzec Interpreter 1

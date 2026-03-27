@@ -1,4 +1,4 @@
-package pollub.karaokeapp.Week5.interpreter;
+package pollub.karaokeapp.Week5.interpreter.filter;
 
 import pollub.karaokeapp.model.song.Song;
 

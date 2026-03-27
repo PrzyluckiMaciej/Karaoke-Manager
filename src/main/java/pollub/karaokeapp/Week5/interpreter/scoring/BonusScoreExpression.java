@@ -1,7 +1,7 @@
 package pollub.karaokeapp.Week5.interpreter.scoring;
 
 /**
- * Tydzień 5, Wzorzec Interpreter 4 (cd.)
+ * Tydzień 5, Wzorzec Interpreter 3
  * Nieterminalny – dodaje stały bonus do wyrażenia punktowego.
  */
 public class BonusScoreExpression implements ScoreExpression {
@@ -26,4 +26,4 @@ public class BonusScoreExpression implements ScoreExpression {
         return "BONUS[" + bonusReason + "+" + bonusValue + "](" + expression.getExpressionDescription() + ")";
     }
 }
-// Koniec, Tydzień 5, Wzorzec Interpreter 4 (cd.)
+// Koniec, Tydzień 5, Wzorzec Interpreter 3
