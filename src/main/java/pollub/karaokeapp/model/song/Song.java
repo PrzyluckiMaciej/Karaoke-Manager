@@ -1,6 +1,7 @@
 package pollub.karaokeapp.model.song;
 
 import pollub.karaokeapp.Week2.prototype.Prototype;
+import pollub.karaokeapp.Week6.visitor.KaraokeVisitor;
 
 /**
  * Tydzień 2, Wzorzec Prototype 2
@@ -37,6 +38,10 @@ public class Song implements Prototype<Song> {
                 ", genre='" + genre + '\'' +
                 ", difficulty=" + difficulty +
                 '}';
+    }
+
+    public void accept(KaraokeVisitor visitor) {
+        visitor.visitSong(this);
     }
 
     public String getTitle() {

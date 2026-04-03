@@ -1,6 +1,7 @@
 package pollub.karaokeapp.model.user;
 
 import pollub.karaokeapp.Week2.prototype.Prototype;
+import pollub.karaokeapp.Week6.visitor.KaraokeVisitor;
 
 /**
  * Tydzień 2, Wzorzec Prototype 3
@@ -17,6 +18,10 @@ public class User implements Prototype<User> {
         this.nickname = nickname;
         this.level = level;
         this.points = points;
+    }
+
+    public void accept(KaraokeVisitor visitor) {
+        visitor.visitUser(this);
     }
 
     public int getPoints() {

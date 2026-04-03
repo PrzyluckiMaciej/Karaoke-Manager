@@ -1,8 +1,10 @@
 package pollub.karaokeapp.model.performance;
 
+import pollub.karaokeapp.Week6.visitor.KaraokeVisitor;
 import pollub.karaokeapp.model.song.Song;
 import pollub.karaokeapp.model.user.User;
 import pollub.karaokeapp.Week2.prototype.Prototype;
+import pollub.karaokeapp.Week6.state.PerformanceState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +19,7 @@ public class Performance implements Prototype<Performance> {
     private Song song;
     private List<User> participants;
     private int score;
+    private PerformanceState state;
 
     public Performance(Song song, List<User> participants, int score) {
         this.song = song;
@@ -44,6 +47,30 @@ public class Performance implements Prototype<Performance> {
                 ", participants=" + participants +
                 ", score=" + score +
                 '}';
+    }
+
+    public void accept(KaraokeVisitor visitor) {
+        visitor.visitPerformance(this);
+    }
+
+    public PerformanceState getState() {
+        return state;
+    }
+
+    public void setState(PerformanceState newState) {
+        this.state = newState;
+    }
+
+    public void playPerformance() {
+        state.play(this);
+    }
+
+    public void pausePerformance() {
+        state.pause(this);
+    }
+
+    public void stopPerformance() {
+        state.stop(this);
     }
 
     public Song getSong() {

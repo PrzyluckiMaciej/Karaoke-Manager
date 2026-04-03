@@ -1,5 +1,6 @@
 package pollub.karaokeapp.model.playlist;
 
+import pollub.karaokeapp.Week6.visitor.KaraokeVisitor;
 import pollub.karaokeapp.model.song.Song;
 import pollub.karaokeapp.Week2.prototype.Prototype;
 
@@ -39,6 +40,10 @@ public class Playlist implements Prototype<Playlist> {
                 "name='" + name + '\'' +
                 ", songs=" + songs +
                 '}';
+    }
+
+    public void accept(KaraokeVisitor visitor) {
+        visitor.visitPlaylist(this);
     }
 
     public String getName() {
