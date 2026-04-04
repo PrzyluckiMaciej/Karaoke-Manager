@@ -83,8 +83,8 @@ public class Week6_Presentation {
 
         publisher3.changeSongDifficulty(7);
 
-        // Observer 4: Wszyscy obserwatorzy razem
-        System.out.println("\n--- Observer 4: Wszyscy obserwatorzy monitorują zmiany ---");
+        // Wszyscy obserwatorzy razem
+        System.out.println("\n--- Observer 1-3: Wszyscy obserwatorzy monitorują zmiany ---");
         Song song4 = new SongBuilder("Hotel California", "Eagles")
                 .setGenre("Rock").setDuration(391).setDifficulty(7).build();
 
@@ -95,6 +95,21 @@ public class Week6_Presentation {
 
         publisher4.changeSongTitle("Hotel California (Live)");
         publisher4.changeSongDifficulty(6);
+
+        // Observer 4: NotificationObserver
+        System.out.println("\n--- Observer 4: System powiadomień reaguje na zmiany ---");
+        Song song5 = new SongBuilder("Shape of You", "Ed Sheeran")
+                .setGenre("Pop").setDuration(233).setDifficulty(4).build();
+        User user1 = new UserBuilder("Anna").setLevel(6).build();
+        User user2 = new UserBuilder("Tomek").setLevel(5).build();
+        List<User> subscribers = List.of(user1, user2);
+
+        SongEventPublisher publisher5 = new SongEventPublisher(song5);
+        NotificationObserver notificationObs = new NotificationObserver(subscribers);
+        publisher5.subscribe(notificationObs);
+
+        publisher5.changeSongTitle("Shape of You (Acoustic)");
+        publisher5.changeSongDifficulty(5);
 
         System.out.println("--------------------------------------------------------------------------------\n");
     }
@@ -121,17 +136,16 @@ public class Week6_Presentation {
         performance1.playPerformance();
         performance1.stopPerformance();
 
-        // State 2: Recording state
-        System.out.println("\n--- State 2: Stan Recording (nagrywanie) ---");
+        // State 2: Buffering state
+        System.out.println("\n--- State 2: Stan Buffering (ładowanie piosenki) ---");
         Performance performance2 = new Performance(song, List.of(user), 200);
-        performance2.setState(new RecordingPerformanceState());
+        performance2.setState(new BufferingPerformanceState());
 
         System.out.println("Stan: " + performance2.getState().getStateName());
         performance2.playPerformance();
         performance2.pausePerformance();
         performance2.stopPerformance();
 
-        // State 3: Muliplicitne przejścia
         System.out.println("\n--- State 3: Pełny cykl wykonania ---");
         Performance performance3 = new Performance(song, List.of(user), 300);
         performance3.setState(new PlayingPerformanceState());
@@ -192,6 +206,12 @@ public class Week6_Presentation {
         organizer.setStrategy(new SortByDurationStrategy(true));
         List<?> byDuration = organizer.organize(playlist);
         byDuration.forEach(s -> System.out.println("  " + ((Song)s).getTitle() + " - Czas: " + ((Song)s).getDuration() + "s"));
+
+        // Strategy 5: Sortowanie po tytule
+        System.out.println("\n--- Strategy 5: Sortowanie po tytule (alfabetycznie A-Z) ---");
+        organizer.setStrategy(new SortByTitleStrategy(true));
+        List<?> byTitle = organizer.organize(playlist);
+        byTitle.forEach(s -> System.out.println("  " + ((Song)s).getTitle() + " - Artysta: " + ((Song)s).getArtist()));
 
         System.out.println("--------------------------------------------------------------------------------\n");
     }
