@@ -239,6 +239,8 @@ public class Week6_Presentation {
         System.out.println("\n--- Template 2: Easy Performance Evaluator ---");
         PerformanceTemplate easyEval = new EasyPerformanceEvaluator();
         int easyScore = easyEval.evaluatePerformance(performance);
+        easyEval = new LegacyPerformanceEvaluator();
+        easyScore = easyEval.evaluatePerformance(performance);
         System.out.println("Wynik Easy: " + easyScore);
 
         // Template 3: Legacy evaluator

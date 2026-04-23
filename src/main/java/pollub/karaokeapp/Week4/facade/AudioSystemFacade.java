@@ -1,7 +1,10 @@
 package pollub.karaokeapp.Week4.facade;
 
+import pollub.karaokeapp.Week3.adapter.audio.AudioInputAdapter;
 import pollub.karaokeapp.model.song.Song;
 import pollub.karaokeapp.Week2.singleton.LoggerSingleton;
+import pollub.karaokeapp.service.audio.AudioInput;
+import pollub.karaokeapp.service.audio.USBMicrophone;
 
 /**
  * Tydzień 4, Wzorzec Facade 2
@@ -52,9 +55,10 @@ public class AudioSystemFacade {
         logger.log("[AUDIO] 🎤 Nagrywanie przez " + durationSeconds + " sekund...");
         byte[] recordedData = new byte[durationSeconds * 44100 * 2];
         // Symulacja nagrywania
+        AudioInput device = new AudioInputAdapter(new USBMicrophone());
         simulateRecording(recordedData);
         logger.log("[AUDIO] ✓ Nagranie zakończone");
-        return recordedData;
+        return device.record(durationSeconds);
     }
 
     // Zatrzymanie audio
