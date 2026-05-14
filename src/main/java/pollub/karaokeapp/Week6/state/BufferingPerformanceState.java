@@ -1,5 +1,6 @@
 package pollub.karaokeapp.Week6.state;
 
+import pollub.karaokeapp.Week6.exception.IllegalPerformanceStateException;
 import pollub.karaokeapp.model.performance.Performance;
 
 /**
@@ -10,12 +11,16 @@ public class BufferingPerformanceState implements PerformanceState {
 
     @Override
     public void play(Performance performance) {
-        System.out.println("[STATE-BUFFERING] Buforowanie w toku... Nie można jeszcze grać.");
+        throw new IllegalPerformanceStateException(
+                "Nie można grać podczas buforowania. Zaczekaj na zakończenie ładowania."
+        );
     }
 
     @Override
     public void pause(Performance performance) {
-        System.out.println("[STATE-BUFFERING] Buforowanie w toku... Nie można pauzować.");
+        throw new IllegalPerformanceStateException(
+                "Nie można pauzować podczas buforowania."
+        );
     }
 
     @Override
@@ -29,4 +34,3 @@ public class BufferingPerformanceState implements PerformanceState {
         return "BUFFERING";
     }
 }
-// Koniec, Tydzień 6, Wzorzec State 4

@@ -12,75 +12,123 @@ import pollub.karaokeapp.service.audio.USBMicrophone;
  * Ukrywa złożoność inicjalizacji i zarządzania urządzeniami audio
  */
 public class AudioSystemFacade {
+    private static final int MIN_VOLUME = 0;
+    private static final int MAX_VOLUME = 100;
+    private static final int DEFAULT_VOLUME = 50;
+    private static final int SAMPLE_RATE = 44100;
+    private static final int BYTES_PER_SAMPLE = 2;
+    private static final String DEFAULT_EFFECT = "none";
 
     private final LoggerSingleton logger = LoggerSingleton.getInstance();
     private boolean audioInitialized = false;
     private boolean isPlaying = false;
-    private int volume = 50;
-    private String currentEffect = "none";
+    private int volume = DEFAULT_VOLUME;
+    private String currentEffect = DEFAULT_EFFECT;
 
-    // Inicjalizacja całego systemu audio
     public void initializeAudio() {
+        logInitializationStart();
+        performHardwareInitialization();
+        markInitializationComplete();
+    }
+
+    private void logInitializationStart() {
         logger.log("[AUDIO] Inicjalizacja systemu audio...");
+    }
+
+    private void performHardwareInitialization() {
         loadAudioDrivers();
         detectAudioDevices();
         calibrateAudioInput();
         setupMicrophone();
+    }
+
+    private void markInitializationComplete() {
         audioInitialized = true;
         logger.log("[AUDIO] ✓ System audio gotowy");
     }
 
-    // Przygotowanie audio do odtworzenia
     public void prepareAudioForPlayback(Song song) {
+        ensureAudioInitialized();
+        logSongPreparation(song);
+        loadAudioFile(song.getTitle());
+        normalizeAudioLevel(song);
+        logPreparationComplete();
+    }
+
+    private void ensureAudioInitialized() {
         if (!audioInitialized) {
             initializeAudio();
         }
+    }
+
+    private void logSongPreparation(Song song) {
         logger.log("[AUDIO] Przygotowywanie: " + song.getTitle());
-        loadAudioFile(song.getTitle());
-        normalizeAudioLevel(song);
+    }
+
+    private void logPreparationComplete() {
         logger.log("[AUDIO] ✓ Audio przygotowane");
     }
 
-    // Odtwarzanie audio
     public void playAudio() {
+        verifyAudioInitialized();
+        startPlayback();
+    }
+
+    private void verifyAudioInitialized() {
         if (!audioInitialized) {
             throw new IllegalStateException("Audio nie zostało zainicjalizowane!");
         }
+    }
+
+    private void startPlayback() {
         isPlaying = true;
         logger.log("[AUDIO] ▶ Odtwarzanie (głośność: " + volume + "%, efekt: " + currentEffect + ")");
     }
 
-    // Nagrywanie audio
     public byte[] recordAudio(int durationSeconds) {
+        logRecordingStart(durationSeconds);
+        byte[] recordedData = captureFromDevice(durationSeconds);
+        logRecordingComplete();
+        return recordedData;
+    }
+
+    private void logRecordingStart(int durationSeconds) {
         logger.log("[AUDIO] 🎤 Nagrywanie przez " + durationSeconds + " sekund...");
-        byte[] recordedData = new byte[durationSeconds * 44100 * 2];
-        // Symulacja nagrywania
-        AudioInput device = new AudioInputAdapter(new USBMicrophone());
-        simulateRecording(recordedData);
-        logger.log("[AUDIO] ✓ Nagranie zakończone");
+    }
+
+    private byte[] captureFromDevice(int durationSeconds) {
+        AudioInput device = createAudioDevice();
         return device.record(durationSeconds);
     }
 
-    // Zatrzymanie audio
+    private void logRecordingComplete() {
+        logger.log("[AUDIO] ✓ Nagranie zakończone");
+    }
+
+    private AudioInput createAudioDevice() {
+        return new AudioInputAdapter(new USBMicrophone());
+    }
+
     public void stopAudio() {
         isPlaying = false;
         logger.log("[AUDIO] ⏹ Zatrzymanie odtwarzania");
     }
 
-    // Aplikowanie efektu audio
     public void applyEffect(String effectType) {
         this.currentEffect = effectType;
         logger.log("[AUDIO] Efekt zmieniony na: " + effectType);
         configureEffectParameters(effectType);
     }
 
-    // Ustawienie głośności
     public void setVolume(int volumeLevel) {
-        this.volume = Math.max(0, Math.min(100, volumeLevel));
+        this.volume = validateVolume(volumeLevel);
         logger.log("[AUDIO] Głośność: " + this.volume + "%");
     }
 
-    // Ustawianie kalibracji
+    private int validateVolume(int volumeLevel) {
+        return Math.max(MIN_VOLUME, Math.min(MAX_VOLUME, volumeLevel));
+    }
+
     public void calibrateDevices() {
         logger.log("[AUDIO] Kalibracja urządzeń...");
         testMicrophone();
@@ -88,7 +136,6 @@ public class AudioSystemFacade {
         logger.log("[AUDIO] ✓ Kalibracja zakończona");
     }
 
-    // Zwolnienie zasobów
     public void releaseResources() {
         logger.log("[AUDIO] Zwalnianie zasobów audio...");
         closeAudioDevices();
@@ -97,71 +144,23 @@ public class AudioSystemFacade {
         logger.log("[AUDIO] ✓ Zasoby zwolnione");
     }
 
-    // Prywatne metody pomocnicze
-    private void loadAudioDrivers() {
-        logger.log("  → Ładowanie sterowników audio");
-    }
+    // Metody pomocnicze
+    private void loadAudioDrivers() { logger.log("  → Ładowanie sterowników audio"); }
+    private void detectAudioDevices() { logger.log("  → Wykrywanie urządzeń audio"); }
+    private void calibrateAudioInput() { logger.log("  → Kalibracja wejścia audio"); }
+    private void setupMicrophone() { logger.log("  → Konfiguracja mikrofonu"); }
+    private void loadAudioFile(String filename) { logger.log("  → Ładowanie pliku: " + filename); }
+    private void normalizeAudioLevel(Song song) { logger.log("  → Normalizacja poziomu dla: " + song.getTitle()); }
+    private void configureEffectParameters(String effect) { logger.log("  → Konfigurowanie parametrów efektu: " + effect); }
+    private void testMicrophone() { logger.log("  → Test mikrofonu"); }
+    private void testSpeakers() { logger.log("  → Test głośników"); }
+    private void closeAudioDevices() { logger.log("  → Zamykanie urządzeń audio"); }
+    private void unloadAudioDrivers() { logger.log("  → Wyładowywanie sterowników"); }
 
-    private void detectAudioDevices() {
-        logger.log("  → Wykrywanie urządzeń audio");
-    }
-
-    private void calibrateAudioInput() {
-        logger.log("  → Kalibracja wejścia audio");
-    }
-
-    private void setupMicrophone() {
-        logger.log("  → Konfiguracja mikrofonu");
-    }
-
-    private void loadAudioFile(String filename) {
-        logger.log("  → Ładowanie pliku: " + filename);
-    }
-
-    private void normalizeAudioLevel(Song song) {
-        logger.log("  → Normalizacja poziomu dla: " + song.getTitle());
-    }
-
-    private void simulateRecording(byte[] buffer) {
-        for (int i = 0; i < buffer.length; i++) {
-            buffer[i] = (byte) (Math.random() * 255);
-        }
-    }
-
-    private void configureEffectParameters(String effect) {
-        logger.log("  → Konfigurowanie parametrów efektu: " + effect);
-    }
-
-    private void testMicrophone() {
-        logger.log("  → Test mikrofonu");
-    }
-
-    private void testSpeakers() {
-        logger.log("  → Test głośników");
-    }
-
-    private void closeAudioDevices() {
-        logger.log("  → Zamykanie urządzeń audio");
-    }
-
-    private void unloadAudioDrivers() {
-        logger.log("  → Wyładowywanie sterowników");
-    }
-
-    public boolean isAudioInitialized() {
-        return audioInitialized;
-    }
-
-    public boolean isPlaying() {
-        return isPlaying;
-    }
-
-    public int getVolume() {
-        return volume;
-    }
-
-    public String getCurrentEffect() {
-        return currentEffect;
-    }
+    // Gettery
+    public boolean isAudioInitialized() { return audioInitialized; }
+    public boolean isPlaying() { return isPlaying; }
+    public int getVolume() { return volume; }
+    public String getCurrentEffect() { return currentEffect; }
 }
 // Koniec, Tydzień 4, Wzorzec Facade 2

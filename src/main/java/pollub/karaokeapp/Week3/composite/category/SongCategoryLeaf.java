@@ -10,6 +10,9 @@ import java.util.List;
  */
 public class SongCategoryLeaf implements CategoryComponent {
 
+    private static final int TARGET_NODE_DEPTH = 1;
+    private static final String INDENT_SPACES = "  ";
+
     private String name;
     private List<Song> songs = new ArrayList<>();
 
@@ -34,18 +37,26 @@ public class SongCategoryLeaf implements CategoryComponent {
 
     @Override
     public CategoryComponent findCategory(String path) {
-        if (path.equals(name)) {
-            return this;
+        if (path == null) {
+            return null;
         }
-        return null;
+        return path.equals(name) ? this : null;
     }
 
     @Override
     public void printStructure(String indent) {
+        printHeader(indent);
+        printSongs(indent);
+    }
+
+    private void printHeader(String indent) {
         System.out.println(indent + "📂 " + name + " (" + songs.size() + " piosenek)");
+    }
+
+    private void printSongs(String indent) {
+        String songIndent = indent + INDENT_SPACES;
         for (Song song : songs) {
-            System.out.println(indent + "  🎵 " + song.getTitle() + " - " + song.getArtist());
+            System.out.println(songIndent + "🎵 " + song.getTitle() + " - " + song.getArtist());
         }
     }
 }
-// Koniec, Tydzień 3, Wzorzec Composite 4

@@ -1,4 +1,3 @@
-// LyricsFileAdapter.java (ulepszona wersja)
 package pollub.karaokeapp.Week3.adapter.lyrics;
 
 import pollub.karaokeapp.model.song.Song;
@@ -15,6 +14,8 @@ import java.util.List;
  */
 public class LyricsFileAdapter extends RawLyricsFileReader implements LyricsProvider {
 
+    private static final String LINE_SEPARATOR = "\n";
+
     public LyricsFileAdapter(String filePath) throws IOException {
         super(filePath);
     }
@@ -22,30 +23,47 @@ public class LyricsFileAdapter extends RawLyricsFileReader implements LyricsProv
     @Override
     public String getLyrics(Song song) {
         String searchKey = song.getTitle() + " - " + song.getArtist();
-        return extractLyricsFromLines(getLines(), searchKey, getFilePath());
+        List<String> lines = getLines();
+
+        int startIndex = findSongEntryIndex(lines, searchKey);
+        return collectLyricsFromLines(lines, startIndex);
     }
 
-    private String extractLyricsFromLines(List<String> lines, String searchKey, Path filePath) {
+    private int findSongEntryIndex(List<String> lines, String searchKey) {
+        for (int i = 0; i < lines.size(); i++) {
+            if (lines.get(i).trim().equalsIgnoreCase(searchKey)) {
+                return i;
+            }
+        }
+        throw new LyricsNotFoundException(
+                "Brak tekstu dla: " + searchKey + " w pliku " + getFilePath().getFileName()
+        );
+    }
+
+    private String collectLyricsFromLines(List<String> lines, int startIndex) {
         StringBuilder lyrics = new StringBuilder();
-        boolean found = false;
-        boolean collecting = false;
 
-        for (String line : lines) {
-            if (line.trim().equalsIgnoreCase(searchKey)) {
-                found = true;
-                collecting = true;
-                continue;
+        for (int i = startIndex + 1; i < lines.size(); i++) {
+            String line = lines.get(i);
+
+            if (isEmptyLine(line)) {
+                break;
             }
-            if (collecting) {
-                if (line.trim().isEmpty()) break;
-                lyrics.append(line).append("\n");
-            }
+
+            lyrics.append(line).append(LINE_SEPARATOR);
         }
 
-        if (!found) {
-            return "Brak tekstu dla: " + searchKey + " w pliku " + filePath.getFileName();
-        }
         return lyrics.toString();
+    }
+
+    private boolean isEmptyLine(String line) {
+        return line == null || line.trim().isEmpty();
+    }
+}
+
+class LyricsNotFoundException extends RuntimeException {
+    public LyricsNotFoundException(String message) {
+        super(message);
     }
 }
 // Koniec, Tydzień 3, Wzorzec Adapter 3

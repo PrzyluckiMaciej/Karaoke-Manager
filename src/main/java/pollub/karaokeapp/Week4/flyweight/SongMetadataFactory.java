@@ -10,15 +10,16 @@ import java.util.Map;
  * Zarządza poolem metadanych
  */
 public class SongMetadataFactory {
-
     private static final Map<String, SongMetadataFlyweight> metadataCache = new HashMap<>();
     private static final LoggerSingleton logger = LoggerSingleton.getInstance();
+    private static final String DEFAULT_COPYRIGHT = "© 2024 Karaoke Manager";
+    private static final String STANDARD_LICENSE = "STANDARD_LICENSE";
+    private static final String EXPLICIT_LICENSE = "EXPLICIT_LICENSE";
 
     static {
         initializeMetadata();
     }
 
-    // Pobranie metadanych (z cache lub stworzenie)
     public static SongMetadataFlyweight getMetadata(String language, String contentRating) {
         String key = (language + "_" + contentRating).toLowerCase();
 
@@ -28,73 +29,37 @@ public class SongMetadataFactory {
         }
 
         logger.log("[METADATA-FLY] Tworzenie nowych metadanych: " + key);
-        SongMetadataFlyweight metadata = new SongMetadataFlyweight(
-                language,
-                contentRating,
-                "© 2024 Karaoke Manager",
-                "STANDARD_LICENSE",
-                false
-        );
+        SongMetadataFlyweight metadata = createMetadata(language, contentRating, false);
         metadataCache.put(key, metadata);
         return metadata;
     }
 
-    // Inicjalizacja wspólnych kombinacji metadanych
+    private static SongMetadataFlyweight createMetadata(String language, String rating, boolean explicit) {
+        String license = explicit ? EXPLICIT_LICENSE : STANDARD_LICENSE;
+        return new SongMetadataFlyweight(language, rating, DEFAULT_COPYRIGHT, license, explicit);
+    }
+
     private static void initializeMetadata() {
-        metadataCache.put("english_u", new SongMetadataFlyweight(
-                "English",
-                "U",
-                "© 2024 Karaoke Manager",
-                "STANDARD_LICENSE",
-                false
-        ));
+        addMetadata("english", "u", false);
+        addMetadata("english", "pg", false);
+        addMetadata("polish", "12", false);
+        addMetadata("english", "15", true);
+        addMetadata("polish", "18", true);
 
-        metadataCache.put("english_pg", new SongMetadataFlyweight(
-                "English",
-                "PG",
-                "© 2024 Karaoke Manager",
-                "STANDARD_LICENSE",
-                false
-        ));
-
-        metadataCache.put("polish_12", new SongMetadataFlyweight(
-                "Polish",
-                "12",
-                "© 2024 Karaoke Manager",
-                "STANDARD_LICENSE",
-                false
-        ));
-
-        metadataCache.put("english_15_explicit", new SongMetadataFlyweight(
-                "English",
-                "15",
-                "© 2024 Karaoke Manager",
-                "EXPLICIT_LICENSE",
-                true
-        ));
-
-        metadataCache.put("polish_18_explicit", new SongMetadataFlyweight(
-                "Polish",
-                "18",
-                "© 2024 Karaoke Manager",
-                "EXPLICIT_LICENSE",
-                true
-        ));
-
-        logger.log("[METADATA-FLY] ✓ Zainicjalizowano 5 kombinacji metadanych");
+        logger.log("[METADATA-FLY] ✓ Zainicjalizowano " + metadataCache.size() + " kombinacji metadanych");
     }
 
-    // Pobranie liczby instancji w cache
-    public static int getCacheSize() {
-        return metadataCache.size();
+    private static void addMetadata(String language, String rating, boolean explicit) {
+        String key = language + "_" + rating;
+        metadataCache.put(key, createMetadata(language, rating, explicit));
     }
 
-    // Wyświetlenie zawartości cache
+    public static int getCacheSize() { return metadataCache.size(); }
+
     public static void printCacheContents() {
         logger.log("[METADATA-FLY] === Cache Metadanych ===");
         for (String key : metadataCache.keySet()) {
-            SongMetadataFlyweight metadata = metadataCache.get(key);
-            logger.log("[METADATA-FLY] " + key + " -> " + metadata);
+            logger.log("[METADATA-FLY] " + key + " -> " + metadataCache.get(key));
         }
     }
 }

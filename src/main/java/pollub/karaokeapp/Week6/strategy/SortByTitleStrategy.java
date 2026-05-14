@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
  */
 public class SortByTitleStrategy implements PlaylistStrategy {
 
-    private boolean ascending;
+    private final boolean ascending;
 
     public SortByTitleStrategy(boolean ascending) {
         this.ascending = ascending;
@@ -19,11 +19,7 @@ public class SortByTitleStrategy implements PlaylistStrategy {
 
     @Override
     public List<?> execute(Playlist playlist) {
-        List<Song> songs = playlist.getSongs().stream()
-                .sorted((s1, s2) -> ascending ?
-                        s1.getTitle().compareToIgnoreCase(s2.getTitle()) :
-                        s2.getTitle().compareToIgnoreCase(s1.getTitle()))
-                .collect(Collectors.toList());
+        List<Song> songs = SongSorter.sort(playlist, SongSorter.byTitle(ascending));
 
         System.out.println("[STRATEGY] Posortowano playlistę po tytule (" +
                 (ascending ? "A-Z" : "Z-A") + ")");

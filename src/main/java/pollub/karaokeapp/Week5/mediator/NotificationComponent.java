@@ -21,16 +21,24 @@ public class NotificationComponent extends KaraokeColleague {
     public void receive(String event, Object data) {
         switch (event) {
             case "SEND_SCORE_UPDATE":
-                notificationsSent++;
-                System.out.println("[NOTIFY] 📧 Wysłano powiadomienie o wyniku: " + data + " pkt (łącznie: " + notificationsSent + ")");
+                sendScoreNotification(data);
                 break;
             case "SEND_WELCOME":
-                notificationsSent++;
-                System.out.println("[NOTIFY] 📱 Wysłano powitanie do: " + data + " (łącznie: " + notificationsSent + ")");
+                sendWelcomeNotification(data);
                 break;
             default:
                 System.out.println("[NOTIFY] Nieobsługiwane zdarzenie: " + event);
         }
+    }
+
+    private void sendScoreNotification(Object score) {
+        notificationsSent++;
+        System.out.println("[NOTIFY] 📧 Wysłano powiadomienie o wyniku: " + score + " pkt (łącznie: " + notificationsSent + ")");
+    }
+
+    private void sendWelcomeNotification(Object userName) {
+        notificationsSent++;
+        System.out.println("[NOTIFY] 📱 Wysłano powitanie do: " + userName + " (łącznie: " + notificationsSent + ")");
     }
 
     public int getNotificationsSent() { return notificationsSent; }

@@ -11,14 +11,20 @@ import java.util.List;
  */
 public class SongEventPublisher {
 
-    private List<KaraokeObserver> observers = new ArrayList<>();
-    private Song song;
+    private final List<KaraokeObserver> observers = new ArrayList<>();
+    private final Song song;
 
     public SongEventPublisher(Song song) {
+        if (song == null) {
+            throw new IllegalArgumentException("Piosenka nie może być null");
+        }
         this.song = song;
     }
 
     public void subscribe(KaraokeObserver observer) {
+        if (observer == null) {
+            throw new IllegalArgumentException("Obserwator nie może być null");
+        }
         observers.add(observer);
         System.out.println("[PUBLISHER] " + observer.getObserverName() + " zasubskrybował zdarzenia piosenki");
     }
@@ -31,13 +37,13 @@ public class SongEventPublisher {
     public void changeSongTitle(String newTitle) {
         String oldTitle = song.getTitle();
         song.setTitle(newTitle);
-        notifyObservers("SONG_TITLE_CHANGED", oldTitle + " -> " + newTitle);
+        notifyObservers(SongEventType.TITLE_CHANGED, oldTitle + " -> " + newTitle);
     }
 
     public void changeSongDifficulty(int newDifficulty) {
         int oldDifficulty = song.getDifficulty();
         song.setDifficulty(newDifficulty);
-        notifyObservers("SONG_DIFFICULTY_CHANGED", "Trudność: " + oldDifficulty + " -> " + newDifficulty);
+        notifyObservers(SongEventType.DIFFICULTY_CHANGED, "Trudność: " + oldDifficulty + " -> " + newDifficulty);
     }
 
     private void notifyObservers(String event, Object data) {

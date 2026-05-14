@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
  */
 public class SortByDifficultyStrategy implements PlaylistStrategy {
 
-    private boolean ascending;
+    private final boolean ascending;
 
     public SortByDifficultyStrategy(boolean ascending) {
         this.ascending = ascending;
@@ -19,11 +19,7 @@ public class SortByDifficultyStrategy implements PlaylistStrategy {
 
     @Override
     public List<?> execute(Playlist playlist) {
-        List<Song> songs = playlist.getSongs().stream()
-                .sorted((s1, s2) -> ascending ?
-                        Integer.compare(s1.getDifficulty(), s2.getDifficulty()) :
-                        Integer.compare(s2.getDifficulty(), s1.getDifficulty()))
-                .collect(Collectors.toList());
+        List<Song> songs = SongSorter.sort(playlist, SongSorter.byDifficulty(ascending));
 
         System.out.println("[STRATEGY] Posortowano playlistę po trudności (" +
                 (ascending ? "rosnąco" : "malejąco") + ")");

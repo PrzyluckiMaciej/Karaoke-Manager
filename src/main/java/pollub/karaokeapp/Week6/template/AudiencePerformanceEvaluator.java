@@ -8,25 +8,27 @@ import pollub.karaokeapp.model.performance.Performance;
  */
 public class AudiencePerformanceEvaluator extends PerformanceTemplate {
 
+    private static final double BASE_SCORE_PERCENTAGE = 0.7;
+    private static final double DIFFICULTY_MULTIPLIER_PER_LEVEL = 0.05;
+    private static final int PARTICIPANT_BONUS = 30;
+    private static final int DUET_BONUS = 75;
+    private static final int MIN_PARTICIPANTS_FOR_DUET = 1;
+
     @Override
     protected int calculateBaseScore(Performance performance) {
-        // Audience scoring: 70% bazowa punktacja
-        return (int)(performance.getScore() * 0.7);
+        return (int)(performance.getScore() * BASE_SCORE_PERCENTAGE);
     }
 
     @Override
     protected int applyDifficultyMultiplier(int score, Performance performance) {
-        // Audience: x1.2 za trudność (mniej karny niż Pro)
         int difficulty = performance.getSong().getDifficulty();
-        return (int)(score * (1.0 + difficulty * 0.05));
+        return (int)(score * (1.0 + difficulty * DIFFICULTY_MULTIPLIER_PER_LEVEL));
     }
 
     @Override
     protected int applyBonus(int score, Performance performance) {
-        // Audience: +30 za każdego uczestnika + bonus za duet
-        int participantBonus = performance.getParticipants().size() * 30;
-        int duetBonus = performance.getParticipants().size() > 1 ? 75 : 0;
+        int participantBonus = performance.getParticipants().size() * PARTICIPANT_BONUS;
+        int duetBonus = performance.getParticipants().size() > MIN_PARTICIPANTS_FOR_DUET ? DUET_BONUS : 0;
         return score + participantBonus + duetBonus;
     }
 }
-// Koniec, Tydzień 6, Wzorzec Template Method 4

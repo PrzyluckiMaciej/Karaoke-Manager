@@ -1,6 +1,7 @@
 package pollub.karaokeapp.Week5.memento.playlist;
 
 import pollub.karaokeapp.Week2.singleton.LoggerSingleton;
+import pollub.karaokeapp.Week5.memento.EmptyHistoryException;
 import pollub.karaokeapp.model.playlist.Playlist;
 
 import java.util.ArrayDeque;
@@ -22,26 +23,39 @@ public class PlaylistCaretaker {
     }
 
     public void save() {
-        PlaylistMemento memento = new PlaylistMemento(
-                playlist.getName(),
-                playlist.getSongs()
-        );
+        PlaylistMemento memento = createMemento();
         history.push(memento);
+        logSave(memento);
+    }
+
+    private PlaylistMemento createMemento() {
+        return new PlaylistMemento(playlist.getName(), playlist.getSongs());
+    }
+
+    private void logSave(PlaylistMemento memento) {
         logger.log("[PLAYLIST-MEMENTO] Zapisano stan: " + memento);
     }
 
-    public boolean undo() {
+    public void undo() throws EmptyHistoryException {
         if (history.isEmpty()) {
-            logger.log("[PLAYLIST-MEMENTO] Brak historii do cofnięcia");
-            return false;
+            throw new EmptyHistoryException("Brak historii do cofnięcia");
         }
         PlaylistMemento memento = history.pop();
-        playlist.setName(memento.getName());
-        playlist.setSongs(memento.getSongs());
-        logger.log("[PLAYLIST-MEMENTO] Przywrócono stan: " + memento);
-        return true;
+        restoreFromMemento(memento);
+        logRestore(memento);
     }
 
-    public int getHistorySize() { return history.size(); }
+    private void restoreFromMemento(PlaylistMemento memento) {
+        playlist.setName(memento.getName());
+        playlist.setSongs(memento.getSongs());
+    }
+
+    private void logRestore(PlaylistMemento memento) {
+        logger.log("[PLAYLIST-MEMENTO] Przywrócono stan: " + memento);
+    }
+
+    public int getHistorySize() {
+        return history.size();
+    }
 }
 // Koniec, Tydzień 5, Wzorzec Memento 3 (Caretaker)

@@ -11,12 +11,22 @@ public class GenreFilterExpression implements SongFilterExpression {
     private final String genre;
 
     public GenreFilterExpression(String genre) {
+        if (genre == null || genre.trim().isEmpty()) {
+            throw new IllegalArgumentException("Nazwa gatunku nie może być pusta");
+        }
         this.genre = genre;
     }
 
     @Override
     public boolean interpret(Song song) {
-        return song.getGenre().equalsIgnoreCase(genre);
+        if (song == null) {
+            throw new IllegalArgumentException("Piosenka nie może być null");
+        }
+        String songGenre = song.getGenre();
+        if (songGenre == null) {
+            return false;
+        }
+        return songGenre.equalsIgnoreCase(genre);
     }
 
     @Override
@@ -24,4 +34,3 @@ public class GenreFilterExpression implements SongFilterExpression {
         return "gatunek='" + genre + "'";
     }
 }
-// Koniec, Tydzień 5, Wzorzec Interpreter 1

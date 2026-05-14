@@ -26,44 +26,56 @@ public class KaraokeSessionMediator implements KaraokeMediator {
     @Override
     public void notify(KaraokeColleague sender, String event, Object data) {
         logger.log("[MEDIATOR] Zdarzenie '" + event + "' od: " + sender.getName());
+        dispatchEvent(event, data);
+    }
 
+    private void dispatchEvent(String event, Object data) {
         switch (event) {
             case "SONG_STARTED":
-                // Gdy piosenka startuje: wyświetl tekst i rozpocznij nagrywanie
-                notifyColleague("display", "SHOW_LYRICS", data);
-                notifyColleague("audio", "START_RECORDING", data);
+                handleSongStarted(data);
                 break;
-
             case "SONG_FINISHED":
-                // Gdy piosenka kończy się: oblicz wynik i wyślij powiadomienie
-                notifyColleague("audio", "STOP_RECORDING", data);
-                notifyColleague("scoring", "CALCULATE_SCORE", data);
+                handleSongFinished(data);
                 break;
-
             case "SCORE_CALCULATED":
-                // Gdy wynik jest gotowy: zaktualizuj wyświetlacz i powiadom użytkownika
-                notifyColleague("display", "SHOW_SCORE", data);
-                notifyColleague("notification", "SEND_SCORE_UPDATE", data);
+                handleScoreCalculated(data);
                 break;
-
             case "USER_JOINED":
-                // Gdy użytkownik dołącza: powiadom wyświetlacz i system powiadomień
-                notifyColleague("display", "SHOW_WELCOME", data);
-                notifyColleague("notification", "SEND_WELCOME", data);
+                handleUserJoined(data);
                 break;
-
             default:
                 logger.log("[MEDIATOR] Nieznane zdarzenie: " + event);
         }
     }
 
+    private void handleSongStarted(Object data) {
+        notifyColleague("display", "SHOW_LYRICS", data);
+        notifyColleague("audio", "START_RECORDING", data);
+    }
+
+    private void handleSongFinished(Object data) {
+        notifyColleague("audio", "STOP_RECORDING", data);
+        notifyColleague("scoring", "CALCULATE_SCORE", data);
+    }
+
+    private void handleScoreCalculated(Object data) {
+        notifyColleague("display", "SHOW_SCORE", data);
+        notifyColleague("notification", "SEND_SCORE_UPDATE", data);
+    }
+
+    private void handleUserJoined(Object data) {
+        notifyColleague("display", "SHOW_WELCOME", data);
+        notifyColleague("notification", "SEND_WELCOME", data);
+    }
+
     private void notifyColleague(String role, String event, Object data) {
         KaraokeColleague colleague = colleagues.get(role);
-        if (colleague != null) {
-            colleague.receive(event, data);
-        } else {
-            logger.log("[MEDIATOR] ⚠ Brak zarejestrowanego komponentu: " + role);
+        if (colleague == null) {
+            throw new IllegalStateException(
+                    "Brak zarejestrowanego komponentu: " + role + " dla zdarzenia: " + event
+            );
         }
+        colleague.receive(event, data);
     }
 }
 // Koniec, Tydzień 5, Wzorzec Mediator

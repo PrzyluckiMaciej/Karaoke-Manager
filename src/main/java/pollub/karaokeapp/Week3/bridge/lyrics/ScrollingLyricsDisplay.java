@@ -1,5 +1,6 @@
 package pollub.karaokeapp.Week3.bridge.lyrics;
 
+import pollub.karaokeapp.Week3.bridge.constants.BridgeConstants;
 import pollub.karaokeapp.model.song.Song;
 import java.util.List;
 
@@ -9,7 +10,7 @@ import java.util.List;
  */
 public class ScrollingLyricsDisplay extends LyricsDisplay {
 
-    private int scrollSpeed;
+    private final int scrollSpeed;
     private int currentLine;
 
     public ScrollingLyricsDisplay(LyricsSource lyricsSource, int scrollSpeed) {
@@ -20,13 +21,14 @@ public class ScrollingLyricsDisplay extends LyricsDisplay {
 
     @Override
     public void showLyrics(Song song) {
-        List<String> lines = lyricsSource.getLyricsLines(song);
-        System.out.println("📜 Przewijane teksty (szybkość: " + scrollSpeed + ")");
-        System.out.println("   Źródło: " + lyricsSource.getSourceType());
+        List<String> lines = getLyricsLines(song);
+
+        printHeader("📜", "Przewijane teksty (szybkość: " + scrollSpeed + ")", lyricsSource.getSourceType());
         System.out.println("   Linii: " + lines.size());
 
-        for (int i = 0; i < Math.min(5, lines.size()); i++) {
-            System.out.println("   " + (i == currentLine ? "→" : " ") + " " + lines.get(i));
+        int linesToShow = Math.min(BridgeConstants.PREVIEW_MAX_LINES, lines.size());
+        for (int i = 0; i < linesToShow; i++) {
+            printLine("", lines.get(i), i == currentLine);
         }
     }
 

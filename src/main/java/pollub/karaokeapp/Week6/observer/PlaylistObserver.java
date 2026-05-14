@@ -7,19 +7,16 @@ package pollub.karaokeapp.Week6.observer;
  */
 public class PlaylistObserver implements KaraokeObserver {
 
-    private String name = "Playlist Manager";
+    private final String name = "Playlist Manager";
 
     @Override
     public void update(String event, Object data) {
-        switch (event) {
-            case "SONG_DIFFICULTY_CHANGED":
-                System.out.println("[OBSERVER-PLAYLIST] Trudność zmieniona! Aktualizuję sortowanie playlisty");
-                reorganizePlaylist((String) data);
-                break;
-            case "SONG_TITLE_CHANGED":
-                System.out.println("[OBSERVER-PLAYLIST] Tytuł zmieniony: " + data);
-                updatePlaylistMetadata((String) data);
-                break;
+        if (SongEventType.DIFFICULTY_CHANGED.equals(event)) {
+            System.out.println("[OBSERVER-PLAYLIST] Trudność zmieniona! Aktualizuję sortowanie playlisty");
+            reorganizePlaylist((String) data);
+        } else if (SongEventType.TITLE_CHANGED.equals(event)) {
+            System.out.println("[OBSERVER-PLAYLIST] Tytuł zmieniony: " + data);
+            updatePlaylistMetadata((String) data);
         }
     }
 

@@ -1,5 +1,6 @@
 package pollub.karaokeapp.Week3.composite.category;
 
+import pollub.karaokeapp.Week3.composite.utils.IndexUtils;
 import pollub.karaokeapp.model.song.Song;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +10,9 @@ import java.util.List;
  * Kompozyt - kategoria zawierająca podkategorie
  */
 public class CategoryComposite implements CategoryComponent {
+
+    private static final int PATH_SEPARATOR_INDEX = 1;
+    private static final String PATH_SEPARATOR = "/";
 
     private String name;
     private List<CategoryComponent> subcategories = new ArrayList<>();
@@ -43,17 +47,40 @@ public class CategoryComposite implements CategoryComponent {
 
     @Override
     public CategoryComponent findCategory(String path) {
-        String[] parts = path.split("/");
-        if (parts[0].equals(name)) {
-            if (parts.length == 1) {
-                return this;
-            }
-            String remainingPath = path.substring(name.length() + 1);
-            for (CategoryComponent subcategory : subcategories) {
-                CategoryComponent found = subcategory.findCategory(remainingPath);
-                if (found != null) {
-                    return found;
-                }
+        if (path == null || path.isEmpty()) {
+            return null;
+        }
+
+        String[] pathParts = splitPath(path);
+        if (!matchesCurrentNode(pathParts)) {
+            return null;
+        }
+
+        return isTargetNode(pathParts) ? this : findInSubcategories(extractRemainingPath(pathParts));
+    }
+
+    private String[] splitPath(String path) {
+        return path.split(PATH_SEPARATOR);
+    }
+
+    private boolean matchesCurrentNode(String[] pathParts) {
+        return pathParts.length > 0 && pathParts[0].equals(name);
+    }
+
+    private boolean isTargetNode(String[] pathParts) {
+        return pathParts.length == PATH_SEPARATOR_INDEX;
+    }
+
+    private String extractRemainingPath(String[] pathParts) {
+        return String.join(PATH_SEPARATOR,
+                java.util.Arrays.copyOfRange(pathParts, PATH_SEPARATOR_INDEX, pathParts.length));
+    }
+
+    private CategoryComponent findInSubcategories(String remainingPath) {
+        for (CategoryComponent subcategory : subcategories) {
+            CategoryComponent found = subcategory.findCategory(remainingPath);
+            if (found != null) {
+                return found;
             }
         }
         return null;
@@ -61,13 +88,28 @@ public class CategoryComposite implements CategoryComponent {
 
     @Override
     public void printStructure(String indent) {
-        System.out.println(indent + "📁 " + name + " (piosenek: " + songs.size() + ", podkategorii: " + subcategories.size() + ")");
+        printHeader(indent);
+        printSongs(indent);
+        printSubcategories(indent);
+    }
+
+    private void printHeader(String indent) {
+        System.out.println(indent + "📁 " + name +
+                " (piosenek: " + songs.size() +
+                ", podkategorii: " + subcategories.size() + ")");
+    }
+
+    private void printSongs(String indent) {
+        String songIndent = indent + "  ";
         for (Song song : songs) {
-            System.out.println(indent + "  🎵 " + song.getTitle());
+            System.out.println(songIndent + "🎵 " + song.getTitle());
         }
+    }
+
+    private void printSubcategories(String indent) {
+        String childIndent = indent + "  ";
         for (CategoryComponent subcategory : subcategories) {
-            subcategory.printStructure(indent + "  ");
+            subcategory.printStructure(childIndent);
         }
     }
 }
-// Koniec, Tydzień 3, Wzorzec Composite 4

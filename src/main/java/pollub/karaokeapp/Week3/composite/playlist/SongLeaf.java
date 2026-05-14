@@ -1,5 +1,6 @@
 package pollub.karaokeapp.Week3.composite.playlist;
 
+import pollub.karaokeapp.Week3.composite.utils.IndexUtils;
 import pollub.karaokeapp.model.song.Song;
 
 /**
@@ -7,6 +8,9 @@ import pollub.karaokeapp.model.song.Song;
  * Liść - pojedyncza piosenka
  */
 public class SongLeaf implements PlaylistComponent {
+
+    private static final int SINGLE_SONG_COUNT = 1;
+    private static final int FIRST_ELEMENT_INDEX = 0;
 
     private Song song;
 
@@ -26,7 +30,7 @@ public class SongLeaf implements PlaylistComponent {
 
     @Override
     public int getSongCount() {
-        return 1;
+        return SINGLE_SONG_COUNT;
     }
 
     @Override
@@ -36,10 +40,9 @@ public class SongLeaf implements PlaylistComponent {
 
     @Override
     public Song getSong(int index) {
-        if (index == 0) {
+        if (IndexUtils.isFirstElement(index)) {
             return song;
         }
-        throw new IndexOutOfBoundsException("Index: " + index);
+        throw new IndexOutOfBoundsException("Index: " + index + ", dozwolony tylko 0");
     }
 }
-// Koniec, Tydzień 3, Wzorzec Composite 1

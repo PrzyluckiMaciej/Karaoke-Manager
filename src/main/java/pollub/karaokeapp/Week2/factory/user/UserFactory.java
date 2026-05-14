@@ -1,5 +1,6 @@
 package pollub.karaokeapp.Week2.factory.user;
 
+import pollub.karaokeapp.Week2.KaraokeConstants;
 import pollub.karaokeapp.model.user.User;
 
 /**
@@ -12,13 +13,13 @@ public class UserFactory {
 
         switch (type.toLowerCase()) {
             case "standard":
-                return new User(nickname, 1, 0);
+                return new User(nickname, KaraokeConstants.USER_DEFAULT_LEVEL, KaraokeConstants.USER_DEFAULT_POINTS);
             case "premium":
-                return new User(nickname, 5, 100);
+                return new User(nickname, KaraokeConstants.USER_PREMIUM_LEVEL, KaraokeConstants.USER_PREMIUM_POINTS);
             case "admin":
-                return new User(nickname, 10, 1000);
+                return new User(nickname, KaraokeConstants.USER_ADMIN_LEVEL, KaraokeConstants.USER_ADMIN_POINTS);
             case "guest":
-                return new User(nickname, 0, 0);
+                return new User(nickname, KaraokeConstants.USER_GUEST_LEVEL, KaraokeConstants.USER_GUEST_POINTS);
             default:
                 throw new IllegalArgumentException("Nieznany typ użytkownika!");
         }

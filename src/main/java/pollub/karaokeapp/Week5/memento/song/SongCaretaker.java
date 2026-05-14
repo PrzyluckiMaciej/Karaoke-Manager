@@ -1,6 +1,7 @@
 package pollub.karaokeapp.Week5.memento.song;
 
 import pollub.karaokeapp.Week2.singleton.LoggerSingleton;
+import pollub.karaokeapp.Week5.memento.EmptyHistoryException;
 import pollub.karaokeapp.model.song.Song;
 
 import java.util.ArrayDeque;
@@ -22,26 +23,32 @@ public class SongCaretaker {
     }
 
     public void save() {
-        SongMemento memento = new SongMemento(
+        SongMemento memento = createMemento();
+        history.push(memento);
+        logSave(memento);
+    }
+
+    private SongMemento createMemento() {
+        return new SongMemento(
                 song.getTitle(), song.getArtist(),
                 song.getDuration(), song.getGenre(), song.getDifficulty()
         );
-        history.push(memento);
+    }
+
+    private void logSave(SongMemento memento) {
         logger.log("[SONG-MEMENTO] Zapisano stan: " + memento);
     }
 
-    public boolean undo() {
+    public void undo() throws EmptyHistoryException {
         if (history.isEmpty()) {
-            logger.log("[SONG-MEMENTO] Brak historii do cofnięcia");
-            return false;
+            throw new EmptyHistoryException("Brak historii do cofnięcia");
         }
         SongMemento memento = history.pop();
-        restore(memento);
-        logger.log("[SONG-MEMENTO] Przywrócono stan: " + memento);
-        return true;
+        restoreFromMemento(memento);
+        logRestore(memento);
     }
 
-    private void restore(SongMemento memento) {
+    private void restoreFromMemento(SongMemento memento) {
         song.setTitle(memento.getTitle());
         song.setArtist(memento.getArtist());
         song.setDuration(memento.getDuration());
@@ -49,6 +56,12 @@ public class SongCaretaker {
         song.setDifficulty(memento.getDifficulty());
     }
 
-    public int getHistorySize() { return history.size(); }
+    private void logRestore(SongMemento memento) {
+        logger.log("[SONG-MEMENTO] Przywrócono stan: " + memento);
+    }
+
+    public int getHistorySize() {
+        return history.size();
+    }
 }
 // Koniec, Tydzień 5, Wzorzec Memento 1 (Caretaker)

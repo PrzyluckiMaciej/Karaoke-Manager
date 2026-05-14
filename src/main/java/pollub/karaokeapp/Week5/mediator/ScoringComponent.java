@@ -7,6 +7,8 @@ package pollub.karaokeapp.Week5.mediator;
  */
 public class ScoringComponent extends KaraokeColleague {
 
+    private static final int SCORE_MIN = 70;
+    private static final int SCORE_RANDOM_RANGE = 30;
     private int lastScore = 0;
 
     public ScoringComponent() {
@@ -15,15 +17,17 @@ public class ScoringComponent extends KaraokeColleague {
 
     @Override
     public void receive(String event, Object data) {
-        switch (event) {
-            case "CALCULATE_SCORE":
-                lastScore = 70 + (int) (Math.random() * 30); // symulacja oceny
-                System.out.println("[SCORING] 🏆 Obliczono wynik dla '" + data + "': " + lastScore + " pkt");
-                mediator.notify(this, "SCORE_CALCULATED", lastScore);
-                break;
-            default:
-                System.out.println("[SCORING] Nieobsługiwane zdarzenie: " + event);
+        if ("CALCULATE_SCORE".equals(event)) {
+            calculateAndNotifyScore(data);
+        } else {
+            System.out.println("[SCORING] Nieobsługiwane zdarzenie: " + event);
         }
+    }
+
+    private void calculateAndNotifyScore(Object songTitle) {
+        lastScore = SCORE_MIN + (int) (Math.random() * SCORE_RANDOM_RANGE);
+        System.out.println("[SCORING] 🏆 Obliczono wynik dla '" + songTitle + "': " + lastScore + " pkt");
+        mediator.notify(this, "SCORE_CALCULATED", lastScore);
     }
 
     public int getLastScore() { return lastScore; }

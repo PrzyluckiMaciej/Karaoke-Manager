@@ -1,5 +1,6 @@
 package pollub.karaokeapp.Week5.iterator.performance;
 
+import pollub.karaokeapp.Week5.iterator.AbstractKaraokeIterator;
 import pollub.karaokeapp.Week5.iterator.KaraokeIterator;
 import pollub.karaokeapp.model.performance.Performance;
 
@@ -11,36 +12,35 @@ import java.util.List;
  * Tydzień 5, Wzorzec Iterator 2 (cd.)
  * Iterator rankingowy – iteruje wykonania posortowane malejąco wg wyniku.
  */
-public class TopScorePerformanceIterator implements KaraokeIterator<Performance> {
-
-    private final List<Performance> sortedPerformances;
-    private int currentIndex = 0;
+public class TopScorePerformanceIterator extends AbstractKaraokeIterator<Performance> {
+    private static final int FIRST_RANK = 1;
 
     public TopScorePerformanceIterator(List<Performance> performances) {
-        this.sortedPerformances = new ArrayList<>(performances);
-        this.sortedPerformances.sort(Comparator.comparingInt(Performance::getScore).reversed());
+        super(createSortedCopy(performances));
+    }
+
+    private static List<Performance> createSortedCopy(List<Performance> performances) {
+        List<Performance> copy = new ArrayList<>(performances);
+        copy.sort(Comparator.comparingInt(Performance::getScore).reversed());
+        return copy;
     }
 
     @Override
     public boolean hasNext() {
-        return currentIndex < sortedPerformances.size();
+        return currentIndex < items.size();
     }
 
     @Override
-    public Performance next() {
-        if (!hasNext()) {
-            throw new java.util.NoSuchElementException("Brak kolejnych wykonań w rankingu");
-        }
-        return sortedPerformances.get(currentIndex++);
+    protected String getNoElementsMessage() {
+        return "Brak kolejnych wykonań w rankingu";
     }
 
-    @Override
-    public void reset() {
-        currentIndex = 0;
+    public int getLastRetrievedRank() {
+        return currentIndex + FIRST_RANK;
     }
 
-    public int getRank() {
-        return currentIndex; // pozycja ostatnio pobranego elementu
+    public int getTotalCount() {
+        return items.size();
     }
 }
 // Koniec, Tydzień 5, Wzorzec Iterator 2 (cd.)

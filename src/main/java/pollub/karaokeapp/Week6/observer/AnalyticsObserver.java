@@ -6,21 +6,19 @@ package pollub.karaokeapp.Week6.observer;
  */
 public class AnalyticsObserver implements KaraokeObserver {
 
-    private String name = "Analytics Engine";
+    private final String name = "Analytics Engine";
     private int eventCount = 0;
 
     @Override
     public void update(String event, Object data) {
         eventCount++;
-        switch (event) {
-            case "SONG_DIFFICULTY_CHANGED":
-                System.out.println("[OBSERVER-ANALYTICS] Zmiana trudności zarejestrowana. Statystyka: " + data);
-                trackModification("difficulty", data);
-                break;
-            case "SONG_TITLE_CHANGED":
-                System.out.println("[OBSERVER-ANALYTICS] Zmiana tytułu zarejestrowana. Zmian łącznie: " + eventCount);
-                trackModification("title", data);
-                break;
+
+        if (SongEventType.DIFFICULTY_CHANGED.equals(event)) {
+            System.out.println("[OBSERVER-ANALYTICS] Zmiana trudności zarejestrowana. Statystyka: " + data);
+            trackModification("difficulty", data);
+        } else if (SongEventType.TITLE_CHANGED.equals(event)) {
+            System.out.println("[OBSERVER-ANALYTICS] Zmiana tytułu zarejestrowana. Zmian łącznie: " + eventCount);
+            trackModification("title", data);
         }
     }
 

@@ -8,6 +8,8 @@ import pollub.karaokeapp.model.playlist.Playlist;
 import pollub.karaokeapp.model.song.Song;
 import pollub.karaokeapp.model.user.User;
 
+import pollub.karaokeapp.Week6.exception.IllegalPerformanceStateException;
+import pollub.karaokeapp.Week6.exception.ValidationException;
 import pollub.karaokeapp.Week6.observer.*;
 import pollub.karaokeapp.Week6.state.*;
 import pollub.karaokeapp.Week6.strategy.*;
@@ -23,10 +25,10 @@ public class Week6_Presentation {
         LoggerSingleton logger = LoggerSingleton.getInstance();
         logger.log("Rozpoczęcie prezentacji wzorców z Tygodnia 6");
 
-        System.out.println("\n=================================================================================");
+        System.out.println("\n================================================================================");
         System.out.println("PREZENTACJA NOWYCH WZORCÓW PROJEKTOWYCH - TYDZIEŃ 6");
         System.out.println("Observer, State, Strategy, Template Method, Visitor");
-        System.out.println("=================================================================================\n");
+        System.out.println("================================================================================\n");
 
         demonstrateObserver();
         demonstrateState();
@@ -115,7 +117,7 @@ public class Week6_Presentation {
     }
 
     // =========================================================================
-    // STATE
+    // STATE - z obsługą wyjątków
     // =========================================================================
     private static void demonstrateState() {
         System.out.println("\n----------------------------------- STATE -----------------------------------");
@@ -124,53 +126,157 @@ public class Week6_Presentation {
                 .setGenre("Pop").setDuration(183).setDifficulty(5).build();
         User user = new UserBuilder("Józek").setLevel(7).build();
 
-        // State 1: Przejścia stanów
-        System.out.println("\n--- State 1: Przejścia stanów Playing -> Paused -> Stopped ---");
+        // State 1: Prawidłowe przejścia stanów
+        System.out.println("\n--- State 1: Prawidłowe przejścia stanów Playing -> Paused -> Playing -> Stopped ---");
         Performance performance1 = new Performance(song, List.of(user), 250);
         performance1.setState(new PlayingPerformanceState());
 
-        System.out.println("Stan: " + performance1.getState().getStateName());
-        performance1.playPerformance();
-        performance1.pausePerformance();
-        System.out.println("Stan: " + performance1.getState().getStateName());
-        performance1.playPerformance();
-        performance1.stopPerformance();
+        System.out.println("Początkowy stan: " + performance1.getState().getStateName());
 
-        // State 2: Buffering state
-        System.out.println("\n--- State 2: Stan Buffering (ładowanie piosenki) ---");
-        Performance performance2 = new Performance(song, List.of(user), 200);
-        performance2.setState(new BufferingPerformanceState());
+        // Prawidłowe przejścia - nie rzucają wyjątków
+        performance1.pausePerformance();  // PLAYING -> PAUSED
+        System.out.println("Po pauzie: " + performance1.getState().getStateName());
 
+        performance1.playPerformance();   // PAUSED -> PLAYING
+        System.out.println("Po wznowieniu: " + performance1.getState().getStateName());
+
+        performance1.stopPerformance();   // PLAYING -> STOPPED
+        System.out.println("Po zatrzymaniu: " + performance1.getState().getStateName());
+
+        // State 2: Obsługa błędnych przejść (wyjątki)
+        System.out.println("\n--- State 2: Obsługa błędów - próba nieprawidłowych operacji ---");
+        Performance performance2 = new Performance(song, List.of(user), 300);
+        performance2.setState(new PlayingPerformanceState());
         System.out.println("Stan: " + performance2.getState().getStateName());
-        performance2.playPerformance();
-        performance2.pausePerformance();
+
+        // Próba odtworzenia gdy już gra - RZUCA WYJĄTEK
+        try {
+            System.out.println("  Próba: playPerformance() gdy stan PLAYING");
+            performance2.playPerformance();
+        } catch (IllegalPerformanceStateException e) {
+            System.out.println("  ✅ Poprawnie obsłużono wyjątek: " + e.getMessage());
+        }
+
+        // Próba pauzy gdy zatrzymany
         performance2.stopPerformance();
+        System.out.println("Stan po stop: " + performance2.getState().getStateName());
 
-        System.out.println("\n--- State 3: Pełny cykl wykonania ---");
-        Performance performance3 = new Performance(song, List.of(user), 300);
-        performance3.setState(new PlayingPerformanceState());
+        try {
+            System.out.println("  Próba: pausePerformance() gdy stan STOPPED");
+            performance2.pausePerformance();
+        } catch (IllegalPerformanceStateException e) {
+            System.out.println("  ✅ Poprawnie obsłużono wyjątek: " + e.getMessage());
+        }
 
-        System.out.println("Stan: " + performance3.getState().getStateName());
-        performance3.pausePerformance();
-        System.out.println("Stan: " + performance3.getState().getStateName());
-        performance3.playPerformance();
+        // State 3: Stan Buffering (ładowanie piosenki) z obsługą wyjątków
+        System.out.println("\n--- State 3: Stan Buffering (ładowanie piosenki) ---");
+        Performance performance3 = new Performance(song, List.of(user), 200);
+        performance3.setState(new BufferingPerformanceState());
         System.out.println("Stan: " + performance3.getState().getStateName());
 
-        // State 4: Próba wykonania niepoprawnych operacji
-        System.out.println("\n--- State 4: Obsługa błędnych przejść ---");
-        Performance performance4 = new Performance(song, List.of(user), 150);
+        // Próba odtworzenia podczas buforowania - RZUCA WYJĄTEK
+        try {
+            System.out.println("  Próba: playPerformance() podczas BUFFERING");
+            performance3.playPerformance();
+        } catch (IllegalPerformanceStateException e) {
+            System.out.println("  ✅ Poprawnie obsłużono wyjątek: " + e.getMessage());
+        }
+
+        // Próba pauzy podczas buforowania - RZUCA WYJĄTEK
+        try {
+            System.out.println("  Próba: pausePerformance() podczas BUFFERING");
+            performance3.pausePerformance();
+        } catch (IllegalPerformanceStateException e) {
+            System.out.println("  ✅ Poprawnie obsłużono wyjątek: " + e.getMessage());
+        }
+
+        // Zatrzymanie buforowania - działa poprawnie
+        System.out.println("  Próba: stopPerformance() podczas BUFFERING");
+        performance3.stopPerformance();
+        System.out.println("  Stan po stop: " + performance3.getState().getStateName());
+
+        // State 4: Pełny cykl życia wykonania
+        System.out.println("\n--- State 4: Pełny cykl życia wykonania ze wszystkimi prawidłowymi przejściami ---");
+        Performance performance4 = new Performance(song, List.of(user), 350);
         performance4.setState(new StoppedPerformanceState());
+        System.out.println("Stan początkowy (STOPPED): " + performance4.getState().getStateName());
 
-        System.out.println("Stan: " + performance4.getState().getStateName());
-        performance4.pausePerformance();
-        performance4.stopPerformance();
+        // STOPPED -> PLAYING
         performance4.playPerformance();
+        System.out.println("  ▶ Po play: " + performance4.getState().getStateName());
 
+        // PLAYING -> PAUSED
+        performance4.pausePerformance();
+        System.out.println("  ⏸ Po pause: " + performance4.getState().getStateName());
+
+        // PAUSED -> PLAYING
+        performance4.playPerformance();
+        System.out.println("  ▶ Po wznowieniu: " + performance4.getState().getStateName());
+
+        // PLAYING -> STOPPED
+        performance4.stopPerformance();
+        System.out.println("  ⏹ Po stop: " + performance4.getState().getStateName());
+
+        // STOPPED -> PLAYING (nowe wykonanie)
+        performance4.playPerformance();
+        System.out.println("  ▶ Nowe wykonanie: " + performance4.getState().getStateName());
+        performance4.stopPerformance();
+
+        // State 5: Test wszystkich błędnych kombinacji
+        System.out.println("\n--- State 5: Kompleksowy test obsługi błędnych przejść ---");
+        Performance performance5 = new Performance(song, List.of(user), 400);
+
+        // Test 1: PLAYING + play()
+        performance5.setState(new PlayingPerformanceState());
+        testInvalidTransition(performance5, "play", "PLAYING");
+
+        // Test 2: PAUSED + pause()
+        performance5.setState(new PausedPerformanceState());
+        testInvalidTransition(performance5, "pause", "PAUSED");
+
+        // Test 3: STOPPED + pause()
+        performance5.setState(new StoppedPerformanceState());
+        testInvalidTransition(performance5, "pause", "STOPPED");
+
+        // Test 4: STOPPED + stop()
+        performance5.setState(new StoppedPerformanceState());
+        testInvalidTransition(performance5, "stop", "STOPPED");
+
+        // Test 5: BUFFERING + play()
+        performance5.setState(new BufferingPerformanceState());
+        testInvalidTransition(performance5, "play", "BUFFERING");
+
+        // Test 6: BUFFERING + pause()
+        performance5.setState(new BufferingPerformanceState());
+        testInvalidTransition(performance5, "pause", "BUFFERING");
+
+        System.out.println("\n✅ Wszystkie wyjątki zostały poprawnie obsłużone - aplikacja działa stabilnie");
         System.out.println("--------------------------------------------------------------------------------\n");
     }
 
+    // Pomocnicza metoda do testowania nieprawidłowych przejść
+    private static void testInvalidTransition(Performance performance, String action, String currentState) {
+        System.out.print("  Test: " + currentState + " + " + action + "() -> ");
+        try {
+            switch (action) {
+                case "play":
+                    performance.playPerformance();
+                    break;
+                case "pause":
+                    performance.pausePerformance();
+                    break;
+                case "stop":
+                    performance.stopPerformance();
+                    break;
+            }
+            System.out.println("❌ BŁĄD: Wyjątek nie został rzucony!");
+        } catch (IllegalPerformanceStateException e) {
+            System.out.println("✅ " + e.getMessage());
+        }
+    }
+
     // =========================================================================
-    // STRATEGY
+    // STRATEGY - z obsługą wyjątków
     // =========================================================================
     private static void demonstrateStrategy() {
         System.out.println("\n----------------------------------- STRATEGY -----------------------------------");
@@ -212,6 +318,22 @@ public class Week6_Presentation {
         organizer.setStrategy(new SortByTitleStrategy(true));
         List<?> byTitle = organizer.organize(playlist);
         byTitle.forEach(s -> System.out.println("  " + ((Song)s).getTitle() + " - Artysta: " + ((Song)s).getArtist()));
+
+        // Strategy 6: Obsługa błędów - null strategy
+        System.out.println("\n--- Strategy 6: Obsługa błędów przy ustawianiu strategii ---");
+        try {
+            organizer.setStrategy(null);
+        } catch (IllegalArgumentException e) {
+            System.out.println("  ❌ Obsłużono wyjątek: " + e.getMessage());
+        }
+
+        // Strategy 7: Obsługa błędów - null playlist
+        System.out.println("\n--- Strategy 7: Obsługa błędów przy null playliście ---");
+        try {
+            organizer.organize(null);
+        } catch (IllegalArgumentException e) {
+            System.out.println("  ❌ Obsłużono wyjątek: " + e.getMessage());
+        }
 
         System.out.println("--------------------------------------------------------------------------------\n");
     }
@@ -259,7 +381,7 @@ public class Week6_Presentation {
     }
 
     // =========================================================================
-    // VISITOR
+    // VISITOR - z obsługą wyjątków
     // =========================================================================
     private static void demonstrateVisitor() {
         System.out.println("\n----------------------------------- VISITOR -----------------------------------");
@@ -285,14 +407,62 @@ public class Week6_Presentation {
         playlist.accept(statsVisitor);
         statsVisitor.printStatistics();
 
-        // Visitor 2: Validation
-        System.out.println("\n--- Visitor 2: Walidacja danych ---");
+        // Visitor 2: Validation - z obsługą błędów walidacji
+        System.out.println("\n--- Visitor 2: Walidacja danych z obsługą wyjątków ---");
         ValidationVisitor validationVisitor = new ValidationVisitor();
-        song1.accept(validationVisitor);
-        user1.accept(validationVisitor);
-        perf.accept(validationVisitor);
-        playlist.accept(validationVisitor);
-        System.out.println("Znalezione błędy: " + validationVisitor.getErrorCount());
+
+        // Walidacja poprawnych danych
+        try {
+            song1.accept(validationVisitor);
+            user1.accept(validationVisitor);
+            perf.accept(validationVisitor);
+            playlist.accept(validationVisitor);
+            System.out.println("  ✓ Wszystkie dane poprawne");
+        } catch (ValidationException e) {
+            System.out.println("  ❌ Błąd walidacji: " + e.getMessage());
+        }
+
+        // Walidacja niepoprawnej piosenki
+        System.out.println("\n  --- Test niepoprawnej piosenki ---");
+        Song invalidSong = new SongBuilder("", "Unknown")  // Pusty tytuł
+                .setGenre("Rock").setDuration(-10).setDifficulty(15).build();  // Niepoprawny czas i trudność
+
+        try {
+            invalidSong.accept(validationVisitor);
+        } catch (ValidationException e) {
+            System.out.println("  ❌ Obsłużono wyjątek walidacji: " + e.getMessage());
+        }
+
+        // Walidacja niepoprawnego użytkownika
+        System.out.println("\n  --- Test niepoprawnego użytkownika ---");
+        User invalidUser = new UserBuilder("").setLevel(0).build();  // Pusty nickname i niepoprawny poziom
+
+        try {
+            invalidUser.accept(validationVisitor);
+        } catch (ValidationException e) {
+            System.out.println("  ❌ Obsłużono wyjątek walidacji: " + e.getMessage());
+        }
+
+        // Walidacja niepoprawnego wykonania
+        System.out.println("\n  --- Test niepoprawnego wykonania ---");
+        Performance invalidPerf = new Performance(song1, new ArrayList<>(), -50);  // Pusta lista uczestników, ujemny wynik
+
+        try {
+            invalidPerf.accept(validationVisitor);
+        } catch (ValidationException e) {
+            System.out.println("  ❌ Obsłużono wyjątek walidacji: " + e.getMessage());
+        }
+
+        // Walidacja niepoprawnej playlisty
+        System.out.println("\n  --- Test niepoprawnej playlisty ---");
+        Playlist invalidPlaylist = new Playlist("");  // Pusta nazwa
+        // Playlista bez piosenek
+
+        try {
+            invalidPlaylist.accept(validationVisitor);
+        } catch (ValidationException e) {
+            System.out.println("  ❌ Obsłużono wyjątek walidacji: " + e.getMessage());
+        }
 
         // Visitor 3: Export
         System.out.println("\n--- Visitor 3: Eksport danych ---");

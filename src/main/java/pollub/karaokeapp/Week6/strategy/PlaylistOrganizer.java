@@ -12,15 +12,21 @@ public class PlaylistOrganizer {
     private PlaylistStrategy strategy;
 
     public PlaylistOrganizer(PlaylistStrategy strategy) {
-        this.strategy = strategy;
+        setStrategy(strategy);
     }
 
     public void setStrategy(PlaylistStrategy strategy) {
+        if (strategy == null) {
+            throw new IllegalArgumentException("Strategia organizacji playlisty nie może być null");
+        }
         this.strategy = strategy;
         System.out.println("[ORGANIZER] Zmiana strategii na: " + strategy.getStrategyName());
     }
 
     public List<?> organize(Playlist playlist) {
+        if (playlist == null) {
+            throw new IllegalArgumentException("Playlista nie może być null");
+        }
         return strategy.execute(playlist);
     }
 
@@ -28,4 +34,3 @@ public class PlaylistOrganizer {
         return strategy.getStrategyName();
     }
 }
-// Koniec, Tydzień 6, Wzorzec Strategy 4

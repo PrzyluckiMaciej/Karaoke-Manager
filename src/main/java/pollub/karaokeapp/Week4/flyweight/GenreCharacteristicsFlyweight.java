@@ -1,24 +1,22 @@
 package pollub.karaokeapp.Week4.flyweight;
 
+import pollub.karaokeapp.Week4.common.UserSkillConstants;
+
 /**
  * Tydzień 4, Wzorzec Flyweight 1
  * Flyweight dla współdzielonych charakterystyk gatunków muzycznych
  * Zmniejsza zużycie pamięci poprzez dzielenie danych między instancje
  */
 public class GenreCharacteristicsFlyweight {
-
     private final String genreName;
     private final String description;
     private final int baseDifficultyLevel;
     private final String recommendedEquipment;
-    private final int averageVocalRange; // w półtonach
+    private final int averageVocalRange;
 
-    public GenreCharacteristicsFlyweight(
-            String genreName,
-            String description,
-            int baseDifficultyLevel,
-            String recommendedEquipment,
-            int averageVocalRange) {
+    public GenreCharacteristicsFlyweight(String genreName, String description,
+                                         int baseDifficultyLevel, String recommendedEquipment,
+                                         int averageVocalRange) {
         this.genreName = genreName;
         this.description = description;
         this.baseDifficultyLevel = baseDifficultyLevel;
@@ -26,37 +24,40 @@ public class GenreCharacteristicsFlyweight {
         this.averageVocalRange = averageVocalRange;
     }
 
-    public String getGenreName() {
-        return genreName;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public int getBaseDifficultyLevel() {
-        return baseDifficultyLevel;
-    }
-
-    public String getRecommendedEquipment() {
-        return recommendedEquipment;
-    }
-
-    public int getAverageVocalRange() {
-        return averageVocalRange;
-    }
-
     public int calculateAdjustedDifficulty(int userSkill) {
-        // baseDifficultyLevel to współdzielona cecha
-        // userSkill to cecha niezależna
-        if (userSkill < 3) {
-            return Math.max(1, baseDifficultyLevel - 2);
-        } else if (userSkill > 7) {
-            return Math.min(10, baseDifficultyLevel + 1);
+        if (isLowSkillUser(userSkill)) {
+            return adjustDifficultyDown();
+        } else if (isHighSkillUser(userSkill)) {
+            return adjustDifficultyUp();
         } else {
             return baseDifficultyLevel;
         }
     }
+
+    private boolean isLowSkillUser(int userSkill) {
+        return userSkill < UserSkillConstants.LOW_SKILL_THRESHOLD;
+    }
+
+    private boolean isHighSkillUser(int userSkill) {
+        return userSkill > UserSkillConstants.HIGH_SKILL_THRESHOLD;
+    }
+
+    private int adjustDifficultyDown() {
+        return Math.max(UserSkillConstants.DIFFICULTY_MIN,
+                baseDifficultyLevel + UserSkillConstants.DIFFICULTY_ADJUST_LOW);
+    }
+
+    private int adjustDifficultyUp() {
+        return Math.min(UserSkillConstants.DIFFICULTY_MAX,
+                baseDifficultyLevel + UserSkillConstants.DIFFICULTY_ADJUST_HIGH);
+    }
+
+    // gettery
+    public String getGenreName() { return genreName; }
+    public String getDescription() { return description; }
+    public int getBaseDifficultyLevel() { return baseDifficultyLevel; }
+    public String getRecommendedEquipment() { return recommendedEquipment; }
+    public int getAverageVocalRange() { return averageVocalRange; }
 
     @Override
     public String toString() {

@@ -11,7 +11,14 @@ public abstract class ScoringDecorator implements ScoringStrategy {
     protected ScoringStrategy decoratedStrategy;
 
     public ScoringDecorator(ScoringStrategy decoratedStrategy) {
+        validateDecoratedStrategy(decoratedStrategy);
         this.decoratedStrategy = decoratedStrategy;
+    }
+
+    private void validateDecoratedStrategy(ScoringStrategy strategy) {
+        if (strategy == null) {
+            throw new IllegalArgumentException("Decorated scoring strategy cannot be null");
+        }
     }
 
     @Override

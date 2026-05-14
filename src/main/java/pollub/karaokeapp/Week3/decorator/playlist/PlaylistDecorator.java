@@ -14,7 +14,14 @@ public abstract class PlaylistDecorator extends Playlist {
 
     public PlaylistDecorator(Playlist decoratedPlaylist) {
         super(decoratedPlaylist.getName());
+        validateDecoratedPlaylist(decoratedPlaylist);
         this.decoratedPlaylist = decoratedPlaylist;
+    }
+
+    private void validateDecoratedPlaylist(Playlist playlist) {
+        if (playlist == null) {
+            throw new IllegalArgumentException("Decorated playlist cannot be null");
+        }
     }
 
     @Override

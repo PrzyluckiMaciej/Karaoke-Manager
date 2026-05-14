@@ -19,16 +19,22 @@ public class PerformanceInviteNotification extends Notification {
 
     @Override
     public void send(String message, User recipient) {
-        String fullMessage = "🎤 Zaproszenie do występu!\n" +
+        String fullMessage = buildInviteMessage(message);
+
+        if (!channel.isAvailable()) {
+            throw new ChannelUnavailableException(
+                    "Kanał " + channel.getChannelName() + " niedostępny dla " + recipient.getNickname()
+            );
+        }
+
+        channel.deliver(fullMessage, recipient);
+    }
+
+    private String buildInviteMessage(String message) {
+        return "🎤 Zaproszenie do występu!\n" +
                 "Piosenka: " + songTitle + "\n" +
                 "Czas: " + time + "\n" +
                 "Wiadomość: " + message;
-
-        if (channel.isAvailable()) {
-            channel.deliver(fullMessage, recipient);
-        } else {
-            System.out.println("⚠ Kanał " + channel.getChannelName() + " niedostępny dla " + recipient.getNickname());
-        }
     }
 
     @Override

@@ -10,32 +10,44 @@ import pollub.karaokeapp.Week2.singleton.LoggerSingleton;
  * Piosenka jest ładowana dopiero przy pierwszym dostępie
  */
 public class LazyLoadingSongProxy extends Song {
-
-    private ExternalSongAPI externalAPI;
+    private final ExternalSongAPI externalAPI;
     private Song realSong;
     private boolean loaded = false;
     private final LoggerSingleton logger = LoggerSingleton.getInstance();
 
-    public LazyLoadingSongProxy(String rawData) {
+    public LazyLoadingSongProxy(String externalSongData) {
         super("", "", 0, "", 0);
-        this.externalAPI = new ExternalSongAPI(rawData);
+        this.externalAPI = new ExternalSongAPI(externalSongData);
     }
 
-    // Leniwe ładowanie rzeczywistej piosenki
     private void loadSongIfNeeded() {
         if (!loaded) {
-            logger.log("[LAZY-PROXY] Ładowanie piosenki z API...");
-            String[] data = externalAPI.parseSongInfo();
-            realSong = new Song(
-                    data[0],
-                    data[1],
-                    Integer.parseInt(data[2]),
-                    data[3],
-                    Integer.parseInt(data[4])
-            );
-            loaded = true;
-            logger.log("[LAZY-PROXY] ✓ Piosenka załadowana: " + realSong.getTitle());
+            performLazyLoad();
         }
+    }
+
+    private void performLazyLoad() {
+        logLazyLoadStart();
+        realSong = createSongFromApiData();
+        markAsLoaded();
+        logLazyLoadComplete();
+    }
+
+    private void logLazyLoadStart() {
+        logger.log("[LAZY-PROXY] Ładowanie piosenki z API...");
+    }
+
+    private Song createSongFromApiData() {
+        String[] data = externalAPI.parseSongInfo();
+        return new Song(data[0], data[1], Integer.parseInt(data[2]), data[3], Integer.parseInt(data[4]));
+    }
+
+    private void markAsLoaded() {
+        loaded = true;
+    }
+
+    private void logLazyLoadComplete() {
+        logger.log("[LAZY-PROXY] ✓ Piosenka załadowana: " + realSong.getTitle());
     }
 
     @Override
@@ -80,8 +92,6 @@ public class LazyLoadingSongProxy extends Song {
         return realSong.clone();
     }
 
-    public boolean isLoaded() {
-        return loaded;
-    }
+    public boolean isLoaded() { return loaded; }
 }
 // Koniec, Tydzień 4, Wzorzec Proxy 1

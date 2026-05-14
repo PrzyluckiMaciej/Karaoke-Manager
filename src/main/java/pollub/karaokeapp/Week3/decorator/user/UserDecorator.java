@@ -12,7 +12,14 @@ public abstract class UserDecorator extends User {
 
     public UserDecorator(User decoratedUser) {
         super(decoratedUser.getNickname(), decoratedUser.getLevel(), decoratedUser.getPoints());
+        validateDecoratedUser(decoratedUser);
         this.decoratedUser = decoratedUser;
+    }
+
+    private void validateDecoratedUser(User user) {
+        if (user == null) {
+            throw new IllegalArgumentException("Decorated user cannot be null");
+        }
     }
 
     @Override

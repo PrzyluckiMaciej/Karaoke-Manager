@@ -7,6 +7,7 @@ package pollub.karaokeapp.Week5.mediator;
  */
 public class AudioComponent extends KaraokeColleague {
 
+    private static final int SIMULATED_RECORDING_SIZE = 1024;
     private boolean isRecording = false;
     private byte[] lastRecording;
 
@@ -28,17 +29,25 @@ public class AudioComponent extends KaraokeColleague {
     public void receive(String event, Object data) {
         switch (event) {
             case "START_RECORDING":
-                isRecording = true;
-                System.out.println("[AUDIO] 🎤 Rozpoczęto nagrywanie: " + data);
-                lastRecording = new byte[1024]; // symulacja
+                startRecording(data);
                 break;
             case "STOP_RECORDING":
-                isRecording = false;
-                System.out.println("[AUDIO] ⏹ Zakończono nagrywanie");
+                stopRecording();
                 break;
             default:
                 System.out.println("[AUDIO] Nieobsługiwane zdarzenie: " + event);
         }
+    }
+
+    private void startRecording(Object data) {
+        isRecording = true;
+        System.out.println("[AUDIO] 🎤 Rozpoczęto nagrywanie: " + data);
+        lastRecording = new byte[SIMULATED_RECORDING_SIZE];
+    }
+
+    private void stopRecording() {
+        isRecording = false;
+        System.out.println("[AUDIO] ⏹ Zakończono nagrywanie");
     }
 
     public boolean isRecording() { return isRecording; }

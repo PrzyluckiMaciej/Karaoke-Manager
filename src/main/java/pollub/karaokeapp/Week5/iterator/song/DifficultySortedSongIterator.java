@@ -1,5 +1,6 @@
 package pollub.karaokeapp.Week5.iterator.song;
 
+import pollub.karaokeapp.Week5.iterator.AbstractKaraokeIterator;
 import pollub.karaokeapp.Week5.iterator.KaraokeIterator;
 import pollub.karaokeapp.model.song.Song;
 
@@ -11,36 +12,45 @@ import java.util.List;
  * Tydzień 5, Wzorzec Iterator 3
  * Iterator piosenek posortowanych rosnąco wg trudności – tryb nauki.
  */
-public class DifficultySortedSongIterator implements KaraokeIterator<Song> {
-
-    private final List<Song> sortedSongs;
-    private int currentIndex = 0;
+public class DifficultySortedSongIterator extends AbstractKaraokeIterator<Song> {
 
     public DifficultySortedSongIterator(List<Song> songs) {
-        this.sortedSongs = new ArrayList<>(songs);
-        this.sortedSongs.sort(Comparator.comparingInt(Song::getDifficulty));
+        super(createDifficultySortedCopy(songs));
+    }
+
+    private static List<Song> createDifficultySortedCopy(List<Song> songs) {
+        List<Song> copy = new ArrayList<>(songs);
+        copy.sort(Comparator.comparingInt(Song::getDifficulty));
+        return copy;
     }
 
     @Override
     public boolean hasNext() {
-        return currentIndex < sortedSongs.size();
+        return currentIndex < items.size();
     }
 
     @Override
-    public Song next() {
-        if (!hasNext()) {
-            throw new java.util.NoSuchElementException("Brak kolejnych piosenek");
+    protected String getNoElementsMessage() {
+        return "Nie znaleziono więcej piosenek w trybie nauki";
+    }
+
+    public int getRemainingCount() {
+        return items.size() - currentIndex;
+    }
+
+    public int getCurrentDifficultyLevel() {
+        if (currentIndex == 0 || currentIndex > items.size()) {
+            return 0;
         }
-        return sortedSongs.get(currentIndex++);
+        return items.get(currentIndex - 1).getDifficulty();
     }
 
-    @Override
-    public void reset() {
-        currentIndex = 0;
+    public boolean hasEasierSongs() {
+        return currentIndex > 0;
     }
 
-    public int getRemaining() {
-        return sortedSongs.size() - currentIndex;
+    public boolean hasHarderSongs() {
+        return currentIndex < items.size();
     }
 }
 // Koniec, Tydzień 5, Wzorzec Iterator 3

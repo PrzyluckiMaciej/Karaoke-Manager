@@ -12,50 +12,54 @@ import java.util.List;
  * Upraszcza operacje na playlistach i ich komponentach
  */
 public class PlaylistManagementFacade {
-
     private final LoggerSingleton logger = LoggerSingleton.getInstance();
     private final List<Playlist> playlists = new ArrayList<>();
     private Playlist currentPlaylist;
 
-    // Tworzenie nowej playlisty
+    private void validateCurrentPlaylist() {
+        if (currentPlaylist == null) {
+            throw new IllegalStateException("Brak aktualnej playlisty!");
+        }
+    }
+
+    private void logPlaylistAction(String action, String detail) {
+        logger.log("[PLAYLIST] " + action + ": " + detail);
+    }
+
     public void createPlaylist(String playlistName) {
         Playlist newPlaylist = new Playlist(playlistName);
         playlists.add(newPlaylist);
         currentPlaylist = newPlaylist;
-        logger.log("[PLAYLIST] Utworzona playlista: " + playlistName);
+        logPlaylistAction("Utworzona playlista", playlistName);
     }
 
-    // Dodanie piosenki do aktualnej playlisty
     public void addSongToPlaylist(Song song) {
-        if (currentPlaylist == null) {
-            throw new IllegalStateException("Brak aktualnej playlisty!");
-        }
+        validateCurrentPlaylist();
         currentPlaylist.addSong(song);
-        logger.log("[PLAYLIST] Dodana piosenka: " + song.getTitle());
+        logPlaylistAction("Dodana piosenka", song.getTitle());
     }
 
-    // Usunięcie piosenki z aktualnej playlisty
     public void removeSongFromPlaylist(String songTitle) {
-        if (currentPlaylist == null) {
-            throw new IllegalStateException("Brak aktualnej playlisty!");
-        }
+        validateCurrentPlaylist();
         currentPlaylist.getSongs().removeIf(s -> s.getTitle().equals(songTitle));
-        logger.log("[PLAYLIST] Usunięta piosenka: " + songTitle);
+        logPlaylistAction("Usunięta piosenka", songTitle);
     }
 
-    // Załadowanie istniejącej playlisty
     public void loadPlaylist(String playlistName) {
+        Playlist found = findPlaylistByName(playlistName);
+        currentPlaylist = found;
+        logPlaylistAction("Załadowana playlista", playlistName);
+    }
+
+    private Playlist findPlaylistByName(String playlistName) {
         for (Playlist playlist : playlists) {
             if (playlist.getName().equals(playlistName)) {
-                currentPlaylist = playlist;
-                logger.log("[PLAYLIST] Załadowana playlista: " + playlistName);
-                return;
+                return playlist;
             }
         }
         throw new IllegalArgumentException("Playlista nie znaleziona: " + playlistName);
     }
 
-    // Wyświetlenie zawartości aktualnej playlisty
     public void displayCurrentPlaylist() {
         if (currentPlaylist == null) {
             logger.log("[PLAYLIST] Brak aktualnej playlisty!");
@@ -67,58 +71,65 @@ public class PlaylistManagementFacade {
         }
     }
 
-    // Sortowanie aktualnej playlisty
     public void sortPlaylistByDifficulty() {
-        if (currentPlaylist == null) {
-            throw new IllegalStateException("Brak aktualnej playlisty!");
-        }
+        validateCurrentPlaylist();
         currentPlaylist.getSongs().sort((s1, s2) -> Integer.compare(s1.getDifficulty(), s2.getDifficulty()));
-        logger.log("[PLAYLIST] ✓ Posortowana po trudności");
+        logPlaylistAction("✓ Posortowana po trudności", "");
     }
 
-    // Filtrowanie playlisty po gatunku
     public Playlist filterByGenre(String genre) {
-        if (currentPlaylist == null) {
-            throw new IllegalStateException("Brak aktualnej playlisty!");
-        }
-        Playlist filteredPlaylist = new Playlist(currentPlaylist.getName() + " (" + genre + ")");
-        for (Song song : currentPlaylist.getSongs()) {
-            if (song.getGenre().equalsIgnoreCase(genre)) {
-                filteredPlaylist.addSong(song);
-            }
-        }
-        logger.log("[PLAYLIST] ✓ Przefiltrowana: " + filteredPlaylist.getSongs().size() + " piosenek");
+        validateCurrentPlaylist();
+        Playlist filteredPlaylist = createEmptyFilteredPlaylist(genre);
+        addSongsMatchingGenre(filteredPlaylist, genre);
+        logFilterResult(filteredPlaylist);
         return filteredPlaylist;
     }
 
-    // Pobranie informacji o aktualnej playliście
+    private Playlist createEmptyFilteredPlaylist(String genre) {
+        return new Playlist(currentPlaylist.getName() + " (" + genre + ")");
+    }
+
+    private void addSongsMatchingGenre(Playlist target, String genre) {
+        for (Song song : currentPlaylist.getSongs()) {
+            if (song.getGenre().equalsIgnoreCase(genre)) {
+                target.addSong(song);
+            }
+        }
+    }
+
+    private void logFilterResult(Playlist playlist) {
+        logger.log("[PLAYLIST] ✓ Przefiltrowana: " + playlist.getSongs().size() + " piosenek");
+    }
+
     public String getPlaylistInfo() {
         if (currentPlaylist == null) {
             return "Brak aktualnej playlisty";
         }
-        int totalDuration = currentPlaylist.getSongs().stream()
+        int totalDuration = calculateTotalDuration();
+        return buildPlaylistInfoString(totalDuration);
+    }
+
+    private int calculateTotalDuration() {
+        return currentPlaylist.getSongs().stream()
                 .mapToInt(Song::getDuration)
                 .sum();
+    }
+
+    private String buildPlaylistInfoString(int totalDuration) {
         return "Playlista: " + currentPlaylist.getName() +
                 " | Piosenek: " + currentPlaylist.getSongs().size() +
                 " | Czas: " + totalDuration + "s";
     }
 
-    // Usunięcie playlisty
     public void deletePlaylist(String playlistName) {
         playlists.removeIf(p -> p.getName().equals(playlistName));
         if (currentPlaylist != null && currentPlaylist.getName().equals(playlistName)) {
             currentPlaylist = null;
         }
-        logger.log("[PLAYLIST] Usunięta playlista: " + playlistName);
+        logPlaylistAction("Usunięta playlista", playlistName);
     }
 
-    public Playlist getCurrentPlaylist() {
-        return currentPlaylist;
-    }
-
-    public List<Playlist> getAllPlaylists() {
-        return new ArrayList<>(playlists);
-    }
+    public Playlist getCurrentPlaylist() { return currentPlaylist; }
+    public List<Playlist> getAllPlaylists() { return new ArrayList<>(playlists); }
 }
 // Koniec, Tydzień 4, Wzorzec Facade 3

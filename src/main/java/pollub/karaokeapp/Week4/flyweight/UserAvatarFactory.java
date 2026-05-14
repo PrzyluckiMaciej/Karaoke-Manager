@@ -10,15 +10,14 @@ import java.util.Map;
  * Zarządza poolem awatarów
  */
 public class UserAvatarFactory {
-
     private static final Map<String, UserAvatarFlyweight> avatarCache = new HashMap<>();
     private static final LoggerSingleton logger = LoggerSingleton.getInstance();
+    private static final String DEFAULT_AVATAR_ID = "default";
 
     static {
         initializeAvatars();
     }
 
-    // Pobranie awatara z cache
     public static UserAvatarFlyweight getAvatar(String avatarId) {
         String key = avatarId.toLowerCase();
 
@@ -27,77 +26,34 @@ public class UserAvatarFactory {
             return avatarCache.get(key);
         }
 
-        logger.log("[AVATAR-FLY] Awatar nie znaleziony: " + avatarId);
+        logger.log("[AVATAR-FLY] Awatar nie znaleziony: " + avatarId + ", zwracam domyślny");
         return getDefaultAvatar();
     }
 
-    // Inicjalizacja wspólnych awatarów
     private static void initializeAvatars() {
-        avatarCache.put("singer_gold", new UserAvatarFlyweight(
-                "SINGER_GOLD",
-                "Golden Singer",
-                "avatar_singer_gold.png",
-                "#FFD700",
-                "MASTER_VOCALIST"
-        ));
+        addAvatar("singer_gold", "Golden Singer", "avatar_singer_gold.png", "#FFD700", "MASTER_VOCALIST");
+        addAvatar("singer_silver", "Silver Singer", "avatar_singer_silver.png", "#C0C0C0", "ADVANCED_VOCALIST");
+        addAvatar("singer_bronze", "Bronze Singer", "avatar_singer_bronze.png", "#CD7F32", "INTERMEDIATE_VOCALIST");
+        addAvatar("beginner_mic", "Beginner", "avatar_beginner.png", "#87CEEB", "NOVICE");
+        addAvatar("legend_crown", "Karaoke Legend", "avatar_legend.png", "#FF1493", "KARAOKE_LEGEND");
 
-        avatarCache.put("singer_silver", new UserAvatarFlyweight(
-                "SINGER_SILVER",
-                "Silver Singer",
-                "avatar_singer_silver.png",
-                "#C0C0C0",
-                "ADVANCED_VOCALIST"
-        ));
-
-        avatarCache.put("singer_bronze", new UserAvatarFlyweight(
-                "SINGER_BRONZE",
-                "Bronze Singer",
-                "avatar_singer_bronze.png",
-                "#CD7F32",
-                "INTERMEDIATE_VOCALIST"
-        ));
-
-        avatarCache.put("beginner_mic", new UserAvatarFlyweight(
-                "BEGINNER_MIC",
-                "Beginner",
-                "avatar_beginner.png",
-                "#87CEEB",
-                "NOVICE"
-        ));
-
-        avatarCache.put("legend_crown", new UserAvatarFlyweight(
-                "LEGEND_CROWN",
-                "Karaoke Legend",
-                "avatar_legend.png",
-                "#FF1493",
-                "KARAOKE_LEGEND"
-        ));
-
-        logger.log("[AVATAR-FLY] ✓ Zainicjalizowano 5 awatarów");
+        logger.log("[AVATAR-FLY] ✓ Zainicjalizowano " + avatarCache.size() + " awatarów");
     }
 
-    // Domyślny awatar
+    private static void addAvatar(String id, String name, String image, String color, String badge) {
+        avatarCache.put(id, new UserAvatarFlyweight(id, name, image, color, badge));
+    }
+
     private static UserAvatarFlyweight getDefaultAvatar() {
-        return new UserAvatarFlyweight(
-                "DEFAULT",
-                "Default User",
-                "avatar_default.png",
-                "#808080",
-                "USER"
-        );
+        return new UserAvatarFlyweight(DEFAULT_AVATAR_ID, "Default User", "avatar_default.png", "#808080", "USER");
     }
 
-    // Pobranie liczby awatarów w cache
-    public static int getCacheSize() {
-        return avatarCache.size();
-    }
+    public static int getCacheSize() { return avatarCache.size(); }
 
-    // Wyświetlenie dostępnych awatarów
     public static void printAvailableAvatars() {
         logger.log("[AVATAR-FLY] === Dostępne Awatary ===");
         for (String key : avatarCache.keySet()) {
-            UserAvatarFlyweight avatar = avatarCache.get(key);
-            logger.log("[AVATAR-FLY] " + avatar.getAvatarName() + " - " + avatar);
+            logger.log("[AVATAR-FLY] " + avatarCache.get(key));
         }
     }
 }

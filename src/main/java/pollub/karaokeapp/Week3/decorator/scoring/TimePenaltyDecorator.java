@@ -8,31 +8,47 @@ import pollub.karaokeapp.service.scoring.ScoringStrategy;
  */
 public class TimePenaltyDecorator extends ScoringDecorator {
 
-    private int maxDurationSeconds;
-    private int actualDurationSeconds;
-    private int penaltyPerSecond;
+    private TimePenaltyConfig config;
 
-    public TimePenaltyDecorator(ScoringStrategy decoratedStrategy,
-                                int maxDurationSeconds,
-                                int actualDurationSeconds,
-                                int penaltyPerSecond) {
+    public TimePenaltyDecorator(ScoringStrategy decoratedStrategy, TimePenaltyConfig config) {
         super(decoratedStrategy);
-        this.maxDurationSeconds = maxDurationSeconds;
-        this.actualDurationSeconds = actualDurationSeconds;
-        this.penaltyPerSecond = penaltyPerSecond;
+        validateTimePenaltyConfig(config);
+        this.config = config;
+    }
+
+    private void validateTimePenaltyConfig(TimePenaltyConfig config) {
+        if (config == null) {
+            throw new IllegalArgumentException("Time penalty config cannot be null");
+        }
+        config.validate();
     }
 
     @Override
     public int calculateScore(int baseScore) {
         int score = super.calculateScore(baseScore);
+        return applyTimePenalty(score);
+    }
 
-        if (actualDurationSeconds > maxDurationSeconds) {
-            int overtime = actualDurationSeconds - maxDurationSeconds;
-            int penalty = overtime * penaltyPerSecond;
-            System.out.println("   - Kara czasowa: " + penalty + " pkt (przekroczono o " + overtime + "s)");
-            return score - penalty;
+    private int applyTimePenalty(int score) {
+        if (!isTimeExceeded()) {
+            return score;
         }
+        return score - calculatePenalty();
+    }
 
-        return score;
+    private boolean isTimeExceeded() {
+        return config.getActualDurationSeconds() > config.getMaxDurationSeconds();
+    }
+
+    private int calculatePenalty() {
+        int overtime = config.getActualDurationSeconds() - config.getMaxDurationSeconds();
+        int penalty = overtime * config.getPenaltyPerSecond();
+        logPenalty(overtime, penalty);
+        return penalty;
+    }
+
+    private void logPenalty(int overtime, int penalty) {
+        System.out.println("   - Kara czasowa: " + penalty + " pkt (przekroczono o " + overtime + "s)");
     }
 }
+// Koniec, Tydzień 3, Wzorzec Decorator 4

@@ -10,16 +10,13 @@ import java.util.Map;
  * Zarządza pulą i ponownym użyciem obiektów Flyweight
  */
 public class GenreCharacteristicsFactory {
-
     private static final Map<String, GenreCharacteristicsFlyweight> cache = new HashMap<>();
     private static final LoggerSingleton logger = LoggerSingleton.getInstance();
 
     static {
-        // Inicjalizacja ze wspólnymi gatunkami
         initializeGenres();
     }
 
-    // Pobranie charakterystyk gatunku (z cache lub stworzenie)
     public static GenreCharacteristicsFlyweight getGenreCharacteristics(String genreName) {
         String key = genreName.toLowerCase();
 
@@ -28,75 +25,29 @@ public class GenreCharacteristicsFactory {
             return cache.get(key);
         }
 
-        // Jeśli nie istnieje, tworzymy nowy (na potrzeby przykładu)
-        logger.log("[GENRE-FLY] Tworzenie nowych charakterystyk: " + genreName);
-        GenreCharacteristicsFlyweight characteristics = new GenreCharacteristicsFlyweight(
-                genreName,
-                "Gatunek: " + genreName,
-                5,
-                "Standard",
-                24
-        );
-        cache.put(key, characteristics);
-        return characteristics;
+        throw new IllegalArgumentException("Nieznany gatunek: " + genreName + ". Dostępne: " + cache.keySet());
     }
 
-    //Inicjalizacja wspólnych gatunków
     private static void initializeGenres() {
-        cache.put("rock", new GenreCharacteristicsFlyweight(
-                "Rock",
-                "Muzyka rockowa - energiczna i ekspresyjna",
-                6,
-                "Mikrofon dynamiczny, wzmacniacz",
-                24
-        ));
+        addGenre("rock", "Muzyka rockowa - energiczna i ekspresyjna", 6, "Mikrofon dynamiczny, wzmacniacz", 24);
+        addGenre("pop", "Muzyka popowa - łatwa i przyjazna", 3, "Mikrofon pojemnościowy, system PA", 18);
+        addGenre("jazz", "Jazz - wymagająca i artystyczna", 8, "Profesjonalny mikrofon, studyjny system", 32);
+        addGenre("rap", "Rap - rytmiczny i agresywny", 7, "Mikrofon USB, przenośny system", 20);
+        addGenre("grunge", "Grunge - surowy i emocjonalny", 7, "Dynamiczny mikrofon, wzmacniacz", 26);
 
-        cache.put("pop", new GenreCharacteristicsFlyweight(
-                "Pop",
-                "Muzyka popowa - łatwa i przyjazna",
-                3,
-                "Mikrofon pojemnościowy, system PA",
-                18
-        ));
-
-        cache.put("jazz", new GenreCharacteristicsFlyweight(
-                "Jazz",
-                "Jazz - wymagająca i artystyczna",
-                8,
-                "Profesjonalny mikrofon, studyjny system",
-                32
-        ));
-
-        cache.put("rap", new GenreCharacteristicsFlyweight(
-                "Rap",
-                "Rap - rytmiczny i agresywny",
-                7,
-                "Mikrofon USB, przenośny system",
-                20
-        ));
-
-        cache.put("grunge", new GenreCharacteristicsFlyweight(
-                "Grunge",
-                "Grunge - surowy i emocjonalny",
-                7,
-                "Dynamiczny mikrofon, wzmacniacz",
-                26
-        ));
-
-        logger.log("[GENRE-FLY] ✓ Zainicjalizowano 5 gatunków");
+        logger.log("[GENRE-FLY] ✓ Zainicjalizowano " + cache.size() + " gatunków");
     }
 
-    // Pobranie liczby instancji w cache
-    public static int getCacheSize() {
-        return cache.size();
+    private static void addGenre(String name, String desc, int difficulty, String equipment, int range) {
+        cache.put(name, new GenreCharacteristicsFlyweight(name, desc, difficulty, equipment, range));
     }
 
-    // Wyświetlenie zawartości cache
+    public static int getCacheSize() { return cache.size(); }
+
     public static void printCacheContents() {
         logger.log("[GENRE-FLY] === Cache Gatunków ===");
         for (String key : cache.keySet()) {
-            GenreCharacteristicsFlyweight genre = cache.get(key);
-            logger.log("[GENRE-FLY] " + genre.getGenreName() + " - " + genre);
+            logger.log("[GENRE-FLY] " + cache.get(key));
         }
     }
 }

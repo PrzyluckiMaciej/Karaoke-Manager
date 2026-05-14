@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
  */
 public class SortByDurationStrategy implements PlaylistStrategy {
 
-    private boolean ascending;
+    private final boolean ascending;
 
     public SortByDurationStrategy(boolean ascending) {
         this.ascending = ascending;
@@ -19,11 +19,7 @@ public class SortByDurationStrategy implements PlaylistStrategy {
 
     @Override
     public List<?> execute(Playlist playlist) {
-        List<Song> songs = playlist.getSongs().stream()
-                .sorted((s1, s2) -> ascending ?
-                        Integer.compare(s1.getDuration(), s2.getDuration()) :
-                        Integer.compare(s2.getDuration(), s1.getDuration()))
-                .collect(Collectors.toList());
+        List<Song> songs = SongSorter.sort(playlist, SongSorter.byDuration(ascending));
 
         System.out.println("[STRATEGY] Posortowano playlistę po czasie trwania (" +
                 (ascending ? "od najkrótszych" : "od najdłuższych") + ")");

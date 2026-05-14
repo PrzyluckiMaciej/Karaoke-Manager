@@ -11,6 +11,8 @@ import java.util.List;
  */
 public class MacroCommand implements KaraokeCommand {
 
+    private static final String LOG_PREFIX = "[MACRO-CMD]";
+
     private final String name;
     private final List<KaraokeCommand> commands = new ArrayList<>();
 
@@ -24,25 +26,41 @@ public class MacroCommand implements KaraokeCommand {
 
     @Override
     public void execute() {
-        System.out.println("[MACRO-CMD] Wykonywanie makra: '" + name + "' (" + commands.size() + " komend)");
-        for (KaraokeCommand cmd : commands) {
-            cmd.execute();
-        }
+        logExecutionStart();
+        executeAllCommands();
     }
 
     @Override
     public void undo() {
-        System.out.println("[MACRO-CMD] Cofanie makra: '" + name + "'");
-        List<KaraokeCommand> reversed = new ArrayList<>(commands);
-        Collections.reverse(reversed);
-        for (KaraokeCommand cmd : reversed) {
-            cmd.undo();
-        }
+        logUndoStart();
+        undoAllCommandsInReverseOrder();
     }
 
     @Override
     public String getDescription() {
         return "Makrokomenda '" + name + "' (" + commands.size() + " kroków)";
+    }
+
+    private void logExecutionStart() {
+        System.out.println(LOG_PREFIX + " Wykonywanie makra: '" + name + "' (" + commands.size() + " komend)");
+    }
+
+    private void logUndoStart() {
+        System.out.println(LOG_PREFIX + " Cofanie makra: '" + name + "'");
+    }
+
+    private void executeAllCommands() {
+        for (KaraokeCommand cmd : commands) {
+            cmd.execute();
+        }
+    }
+
+    private void undoAllCommandsInReverseOrder() {
+        List<KaraokeCommand> reversed = new ArrayList<>(commands);
+        Collections.reverse(reversed);
+        for (KaraokeCommand cmd : reversed) {
+            cmd.undo();
+        }
     }
 }
 // Koniec, Tydzień 5, Wzorzec Command

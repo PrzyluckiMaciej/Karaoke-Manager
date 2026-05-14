@@ -1,5 +1,7 @@
 package pollub.karaokeapp.Week4.proxy;
 
+import pollub.karaokeapp.Week4.common.AccessPermission;
+import pollub.karaokeapp.Week4.common.TestCredentials;
 import pollub.karaokeapp.model.user.User;
 import pollub.karaokeapp.Week2.singleton.LoggerSingleton;
 
@@ -9,10 +11,9 @@ import pollub.karaokeapp.Week2.singleton.LoggerSingleton;
  * Kontroluje dostęp do danych użytkownika na podstawie uprawnień
  */
 public class UserAuthenticationProxy extends User {
-
     private final User realUser;
     private final LoggerSingleton logger = LoggerSingleton.getInstance();
-    private String userRole;
+    private final String userRole;
     private boolean isAuthenticated;
     private String authToken;
 
@@ -24,53 +25,74 @@ public class UserAuthenticationProxy extends User {
         this.authToken = null;
     }
 
-    // Autentykacja użytkownika
     public boolean authenticate(String password) {
-        logger.log("[AUTH-PROXY] Autentykacja użytkownika: " + realUser.getNickname());
-        // Symulacja weryfikacji hasła
-        if (validatePassword(password)) {
-            isAuthenticated = true;
-            authToken = generateToken();
-            logger.log("[AUTH-PROXY] ✓ Autentykacja pomyślna");
+        logAuthenticationAttempt();
+        if (isValidPassword(password)) {
+            completeSuccessfulAuthentication();
             return true;
         }
-        logger.log("[AUTH-PROXY] ✗ Autentykacja nieudana");
+        logFailedAuthentication();
         return false;
     }
 
-    // Sprawdzenie, czy użytkownik ma dostęp do funkcji
-    private void checkAccess(String feature) {
+    private void logAuthenticationAttempt() {
+        logger.log("[AUTH-PROXY] Autentykacja użytkownika: " + realUser.getNickname());
+    }
+
+    private boolean isValidPassword(String password) {
+        return TestCredentials.TEST_PASSWORD.equals(password);
+    }
+
+    private void completeSuccessfulAuthentication() {
+        isAuthenticated = true;
+        authToken = generateToken();
+        logger.log("[AUTH-PROXY] ✓ Autentykacja pomyślna");
+    }
+
+    private void logFailedAuthentication() {
+        logger.log("[AUTH-PROXY] ✗ Autentykacja nieudana");
+    }
+
+    private void checkAccess(AccessPermission permission) {
+        verifyAuthentication();
+        verifyPermission(permission);
+    }
+
+    private void verifyAuthentication() {
         if (!isAuthenticated) {
             throw new SecurityException("[AUTH-PROXY] Dostęp odmówiony - użytkownik nie jest zalogowany!");
         }
-        if (!hasPermission(feature)) {
-            throw new SecurityException("[AUTH-PROXY] Dostęp odmówiony - brak uprawnień do: " + feature);
+    }
+
+    private void verifyPermission(AccessPermission permission) {
+        if (!hasPermission(permission)) {
+            throw new SecurityException("[AUTH-PROXY] Dostęp odmówiony - brak uprawnień do: " + permission);
         }
     }
 
     @Override
     public int getPoints() {
-        checkAccess("read_points");
+        checkAccess(AccessPermission.READ_POINTS);
         logger.log("[AUTH-PROXY] Dostęp przyznany do odczytu punktów");
         return realUser.getPoints();
     }
 
     @Override
     public void setPoints(int points) {
-        checkAccess("write_points");
+        checkAccess(AccessPermission.WRITE_POINTS);
         realUser.setPoints(points);
         logger.log("[AUTH-PROXY] Punkty zaktualizowane");
     }
 
     @Override
     public int getLevel() {
-        checkAccess("read_level");
+        checkAccess(AccessPermission.READ_LEVEL);
         return realUser.getLevel();
     }
 
     @Override
     public void setLevel(int level) {
-        checkAccess("write_level");
+        checkAccess(AccessPermission.WRITE_LEVEL);
         realUser.setLevel(level);
         logger.log("[AUTH-PROXY] Poziom zaktualizowany");
     }
@@ -80,46 +102,35 @@ public class UserAuthenticationProxy extends User {
         return realUser.getNickname();
     }
 
+    private String generateToken() {
+        return "TOKEN_" + System.currentTimeMillis();
+    }
+
+    private boolean hasPermission(AccessPermission permission) {
+        if ("admin".equals(userRole)) {
+            return true;
+        }
+        if ("premium".equals(userRole)) {
+            return permission != AccessPermission.ADMIN_ONLY;
+        }
+        return permission == AccessPermission.READ_POINTS || permission == AccessPermission.READ_LEVEL;
+    }
+
+    public boolean isAuthenticated() { return isAuthenticated; }
+    public String getUserRole() { return userRole; }
+
+    public void logout() {
+        isAuthenticated = false;
+        authToken = null;
+        logger.log("[AUTH-PROXY] Użytkownik wylogowany");
+    }
+
     @Override
     public String toString() {
         if (!isAuthenticated) {
             return "User{nickname='" + realUser.getNickname() + "', [NOT AUTHENTICATED]}";
         }
         return realUser.toString();
-    }
-
-    // --- Prywatne metody pomocnicze ---
-    private boolean validatePassword(String password) {
-        // Symulacja weryfikacji
-        return password.equals("password123");
-    }
-
-    private String generateToken() {
-        return "TOKEN_" + System.currentTimeMillis();
-    }
-
-    private boolean hasPermission(String feature) {
-        if (userRole.equals("admin")) {
-            return true;
-        }
-        if (userRole.equals("premium")) {
-            return !feature.equals("admin_only");
-        }
-        return feature.equals("read_points") || feature.equals("read_level");
-    }
-
-    public boolean isAuthenticated() {
-        return isAuthenticated;
-    }
-
-    public String getUserRole() {
-        return userRole;
-    }
-
-    public void logout() {
-        isAuthenticated = false;
-        authToken = null;
-        logger.log("[AUTH-PROXY] Użytkownik wylogowany");
     }
 }
 // Koniec, Tydzień 4, Wzorzec Proxy 3

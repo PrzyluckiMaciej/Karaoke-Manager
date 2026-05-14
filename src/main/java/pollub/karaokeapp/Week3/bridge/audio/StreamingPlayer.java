@@ -1,18 +1,20 @@
 package pollub.karaokeapp.Week3.bridge.audio;
 
+import pollub.karaokeapp.Week3.bridge.constants.BridgeConstants;
+
 /**
  * Tydzień 3, Wzorzec Bridge 2
  * Konkretna implementacja - odtwarzacz streamingowy
  */
 public class StreamingPlayer extends AudioPlayer {
 
-    private int volume;
+    private final VolumeControl volumeControl;
     private boolean isPlaying;
-    private String streamUrl;
+    private final String streamUrl;
 
     public StreamingPlayer(AudioSource audioSource, String streamUrl) {
         super(audioSource);
-        this.volume = 70;
+        this.volumeControl = new VolumeControl(BridgeConstants.DEFAULT_STREAMING_VOLUME);
         this.isPlaying = false;
         this.streamUrl = streamUrl;
     }
@@ -22,7 +24,7 @@ public class StreamingPlayer extends AudioPlayer {
         isPlaying = true;
         System.out.println("🌐 Streaming z: " + streamUrl);
         System.out.println("   Źródło: " + audioSource.getSourceName() +
-                " (czas: " + audioSource.getDuration() + "s, głośność: " + volume + ")");
+                " (czas: " + audioSource.getDuration() + "s, głośność: " + volumeControl.getVolume() + ")");
     }
 
     @Override
@@ -33,8 +35,8 @@ public class StreamingPlayer extends AudioPlayer {
 
     @Override
     public void setVolume(int volume) {
-        this.volume = Math.max(0, Math.min(100, volume));
-        System.out.println("🔊 Głośność streamingu: " + this.volume);
+        volumeControl.setVolume(volume);
+        volumeControl.printVolumeChange("streamingu");
     }
 
     @Override

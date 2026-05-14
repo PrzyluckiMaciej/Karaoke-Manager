@@ -7,18 +7,15 @@ package pollub.karaokeapp.Week6.observer;
  */
 public class ScoringObserver implements KaraokeObserver {
 
-    private String name = "Scoring System";
+    private final String name = "Scoring System";
 
     @Override
     public void update(String event, Object data) {
-        switch (event) {
-            case "SONG_DIFFICULTY_CHANGED":
-                System.out.println("[OBSERVER-SCORING] Trudność zmieniona! Aktualizuję algorytm oceniania: " + data);
-                recalibrateScoringAlgorithm((String) data);
-                break;
-            case "SONG_TITLE_CHANGED":
-                System.out.println("[OBSERVER-SCORING] Tytuł zmieniony: " + data);
-                break;
+        if (SongEventType.DIFFICULTY_CHANGED.equals(event)) {
+            System.out.println("[OBSERVER-SCORING] Trudność zmieniona! Aktualizuję algorytm oceniania: " + data);
+            recalibrateScoringAlgorithm((String) data);
+        } else if (SongEventType.TITLE_CHANGED.equals(event)) {
+            System.out.println("[OBSERVER-SCORING] Tytuł zmieniony: " + data);
         }
     }
 

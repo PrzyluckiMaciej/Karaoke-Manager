@@ -1,5 +1,6 @@
 package pollub.karaokeapp.Week2.builder.user;
 
+import pollub.karaokeapp.Week2.KaraokeConstants;
 import pollub.karaokeapp.model.user.User;
 
 /**
@@ -10,8 +11,8 @@ import pollub.karaokeapp.model.user.User;
 public class UserBuilder {
 
     private final String nickname;
-    private int level = 1;
-    private int points = 0;
+    private int level = KaraokeConstants.USER_DEFAULT_LEVEL;
+    private int points = KaraokeConstants.USER_DEFAULT_POINTS;
 
     public UserBuilder(String nickname) {
         this.nickname = nickname;

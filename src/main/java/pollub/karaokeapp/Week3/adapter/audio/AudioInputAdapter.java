@@ -9,6 +9,9 @@ import pollub.karaokeapp.service.audio.ExternalInputDevice;
  */
 public class AudioInputAdapter implements AudioInput {
 
+    private static final int BYTES_PER_SAMPLE = 2;
+    private static final int BYTES_PER_CHUNK = 6;  // Zależne od urządzenia, można wyciągnąć z device
+
     private final ExternalInputDevice device;
     private byte[] lastBuffer;
 
@@ -18,15 +21,31 @@ public class AudioInputAdapter implements AudioInput {
 
     @Override
     public byte[] record(int durationSeconds) {
-        byte[] result = new byte[durationSeconds * device.getSampleRate() * 2];
+        byte[] buffer = allocateBuffer(durationSeconds);
+        fillBufferWithAudioData(buffer);
+        return storeAndReturn(buffer);
+    }
 
-        for (int i = 0; i < result.length; i += 6) {
+    private byte[] allocateBuffer(int durationSeconds) {
+        int totalBytes = durationSeconds * device.getSampleRate() * BYTES_PER_SAMPLE;
+        return new byte[totalBytes];
+    }
+
+    private void fillBufferWithAudioData(byte[] buffer) {
+        for (int offset = 0; offset < buffer.length; offset += BYTES_PER_CHUNK) {
             byte[] chunk = device.readAudioData();
-            System.arraycopy(chunk, 0, result, i, Math.min(chunk.length, result.length - i));
+            copyChunkToBuffer(chunk, buffer, offset);
         }
+    }
 
-        lastBuffer = result;
-        return result;
+    private void copyChunkToBuffer(byte[] chunk, byte[] buffer, int offset) {
+        int bytesToCopy = Math.min(chunk.length, buffer.length - offset);
+        System.arraycopy(chunk, 0, buffer, offset, bytesToCopy);
+    }
+
+    private byte[] storeAndReturn(byte[] buffer) {
+        this.lastBuffer = buffer;
+        return buffer;
     }
 
     @Override

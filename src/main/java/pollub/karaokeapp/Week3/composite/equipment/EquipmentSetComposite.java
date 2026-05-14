@@ -9,6 +9,8 @@ import java.util.List;
  */
 public class EquipmentSetComposite implements EquipmentComponent {
 
+    private static final int INDENT_INCREMENT = 2;
+
     private String name;
     private List<EquipmentComponent> items = new ArrayList<>();
     private boolean isOn;
@@ -48,18 +50,36 @@ public class EquipmentSetComposite implements EquipmentComponent {
     @Override
     public void turnOn(String indent) {
         isOn = true;
+        printTurnOnHeader(indent);
+        turnOnAllItems(indent);
+    }
+
+    private void printTurnOnHeader(String indent) {
         System.out.println(indent + "🔌 Włączanie zestawu: " + name);
+    }
+
+    private void turnOnAllItems(String indent) {
+        String childIndent = indent + " ".repeat(INDENT_INCREMENT);
         for (EquipmentComponent item : items) {
-            item.turnOn(indent + "  ");
+            item.turnOn(childIndent);
         }
     }
 
     @Override
     public void turnOff(String indent) {
         isOn = false;
+        printTurnOffHeader(indent);
+        turnOffAllItems(indent);
+    }
+
+    private void printTurnOffHeader(String indent) {
         System.out.println(indent + "🔌 Wyłączanie zestawu: " + name);
+    }
+
+    private void turnOffAllItems(String indent) {
+        String childIndent = indent + " ".repeat(INDENT_INCREMENT);
         for (EquipmentComponent item : items) {
-            item.turnOff(indent + "  ");
+            item.turnOff(childIndent);
         }
     }
 
@@ -68,4 +88,3 @@ public class EquipmentSetComposite implements EquipmentComponent {
         return isOn && items.stream().allMatch(EquipmentComponent::isOn);
     }
 }
-// Koniec, Tydzień 3, Wzorzec Composite 3

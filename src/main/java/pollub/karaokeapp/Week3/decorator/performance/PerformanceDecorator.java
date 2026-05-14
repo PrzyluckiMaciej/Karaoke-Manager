@@ -17,7 +17,14 @@ public abstract class PerformanceDecorator extends Performance {
         super(decoratedPerformance.getSong(),
                 decoratedPerformance.getParticipants(),
                 decoratedPerformance.getScore());
+        validateDecoratedPerformance(decoratedPerformance);
         this.decoratedPerformance = decoratedPerformance;
+    }
+
+    private void validateDecoratedPerformance(Performance performance) {
+        if (performance == null) {
+            throw new IllegalArgumentException("Decorated performance cannot be null");
+        }
     }
 
     @Override

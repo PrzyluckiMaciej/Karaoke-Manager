@@ -14,8 +14,13 @@ public class RandomPlaylistStrategy implements PlaylistStrategy {
 
     @Override
     public List<?> execute(Playlist playlist) {
+        if (playlist == null || playlist.getSongs() == null) {
+            throw new IllegalArgumentException("Playlista nie może być null");
+        }
+
         List<Song> shuffled = new ArrayList<>(playlist.getSongs());
         Collections.shuffle(shuffled);
+
         System.out.println("[STRATEGY] Playlistę potasowano losowo (" + shuffled.size() + " piosenek)");
         return shuffled;
     }

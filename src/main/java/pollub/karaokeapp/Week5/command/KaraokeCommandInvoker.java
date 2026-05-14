@@ -16,6 +16,7 @@ public class KaraokeCommandInvoker {
     private final LoggerSingleton logger = LoggerSingleton.getInstance();
 
     public void execute(KaraokeCommand command) {
+        validateCommand(command);
         command.execute();
         history.push(command);
         redoStack.clear();
@@ -24,8 +25,7 @@ public class KaraokeCommandInvoker {
 
     public void undo() {
         if (history.isEmpty()) {
-            logger.log("[INVOKER] Brak komend do cofnięcia");
-            return;
+            throw new IllegalStateException("Brak komend do cofnięcia");
         }
         KaraokeCommand command = history.pop();
         command.undo();
@@ -35,8 +35,7 @@ public class KaraokeCommandInvoker {
 
     public void redo() {
         if (redoStack.isEmpty()) {
-            logger.log("[INVOKER] Brak komend do ponowienia");
-            return;
+            throw new IllegalStateException("Brak komend do ponowienia");
         }
         KaraokeCommand command = redoStack.pop();
         command.execute();
@@ -51,6 +50,12 @@ public class KaraokeCommandInvoker {
 
     public int getHistorySize() {
         return history.size();
+    }
+
+    private void validateCommand(KaraokeCommand command) {
+        if (command == null) {
+            throw new IllegalArgumentException("Komenda nie może być null");
+        }
     }
 }
 // Koniec, Tydzień 5, Wzorzec Command 1 (Invoker)

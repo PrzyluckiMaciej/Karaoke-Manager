@@ -1,5 +1,6 @@
 package pollub.karaokeapp.Week3.bridge.notification;
 
+import pollub.karaokeapp.Week3.bridge.constants.BridgeConstants;
 import pollub.karaokeapp.model.user.User;
 
 /**
@@ -8,7 +9,7 @@ import pollub.karaokeapp.model.user.User;
  */
 public class SMSChannel implements NotificationChannel {
 
-    private String phoneNumber;
+    private final String phoneNumber;
     private int creditBalance;
 
     public SMSChannel(String phoneNumber, int creditBalance) {
@@ -18,13 +19,25 @@ public class SMSChannel implements NotificationChannel {
 
     @Override
     public void deliver(String message, User user) {
-        if (creditBalance > 0) {
-            System.out.println("📱 SMS na numer: " + phoneNumber);
-            System.out.println("   Treść: " + message.substring(0, Math.min(160, message.length())));
-            System.out.println("   Pozostało SMS: " + (--creditBalance));
-        } else {
-            System.out.println("⚠ Brak środków na SMS dla " + user.getNickname());
+        if (!isAvailable()) {
+            throw new ChannelUnavailableException(
+                    "Brak środków na SMS dla użytkownika: " + user.getNickname()
+            );
         }
+
+        String truncatedMessage = truncateMessage(message);
+        creditBalance--;
+
+        System.out.println("📱 SMS na numer: " + phoneNumber);
+        System.out.println("   Treść: " + truncatedMessage);
+        System.out.println("   Pozostało SMS: " + creditBalance);
+    }
+
+    private String truncateMessage(String message) {
+        if (message.length() <= BridgeConstants.SMS_MAX_LENGTH) {
+            return message;
+        }
+        return message.substring(0, BridgeConstants.SMS_MAX_LENGTH);
     }
 
     @Override
@@ -35,6 +48,12 @@ public class SMSChannel implements NotificationChannel {
     @Override
     public String getChannelName() {
         return "SMS (nr: " + phoneNumber + ", saldo: " + creditBalance + ")";
+    }
+}
+
+class ChannelUnavailableException extends RuntimeException {
+    public ChannelUnavailableException(String message) {
+        super(message);
     }
 }
 // Koniec, Tydzień 3, Wzorzec Bridge 4

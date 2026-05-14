@@ -5,6 +5,7 @@ import pollub.karaokeapp.model.song.Song;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Tydzień 3, Wzorzec Decorator 2
@@ -22,7 +23,7 @@ public class ShuffledPlaylistDecorator extends PlaylistDecorator {
     @Override
     public List<Song> getSongs() {
         List<Song> shuffled = new ArrayList<>(decoratedPlaylist.getSongs());
-        Collections.shuffle(shuffled, new java.util.Random(seed));
+        Collections.shuffle(shuffled, new Random(seed));
         return shuffled;
     }
 

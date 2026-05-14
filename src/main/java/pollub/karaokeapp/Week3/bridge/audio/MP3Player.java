@@ -1,17 +1,19 @@
 package pollub.karaokeapp.Week3.bridge.audio;
 
+import pollub.karaokeapp.Week3.bridge.constants.BridgeConstants;
+
 /**
  * Tydzień 3, Wzorzec Bridge 2
  * Konkretna implementacja - odtwarzacz MP3
  */
 public class MP3Player extends AudioPlayer {
 
-    private int volume;
+    private final VolumeControl volumeControl;
     private boolean isPlaying;
 
     public MP3Player(AudioSource audioSource) {
         super(audioSource);
-        this.volume = 50;
+        this.volumeControl = new VolumeControl(BridgeConstants.DEFAULT_MP3_VOLUME);
         this.isPlaying = false;
     }
 
@@ -19,7 +21,7 @@ public class MP3Player extends AudioPlayer {
     public void play() {
         isPlaying = true;
         System.out.println("▶ Odtwarzacz MP3: " + audioSource.getSourceName() +
-                " (czas: " + audioSource.getDuration() + "s, głośność: " + volume + ")");
+                " (czas: " + audioSource.getDuration() + "s, głośność: " + volumeControl.getVolume() + ")");
     }
 
     @Override
@@ -30,8 +32,8 @@ public class MP3Player extends AudioPlayer {
 
     @Override
     public void setVolume(int volume) {
-        this.volume = Math.max(0, Math.min(100, volume));
-        System.out.println("🔊 Głośność MP3: " + this.volume);
+        volumeControl.setVolume(volume);
+        volumeControl.printVolumeChange("MP3");
     }
 
     @Override

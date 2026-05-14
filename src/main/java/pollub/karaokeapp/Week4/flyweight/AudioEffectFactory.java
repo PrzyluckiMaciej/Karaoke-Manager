@@ -1,6 +1,8 @@
 package pollub.karaokeapp.Week4.flyweight;
 
 import pollub.karaokeapp.Week2.singleton.LoggerSingleton;
+import pollub.karaokeapp.Week4.common.AudioEffectSpec;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,7 +12,6 @@ import java.util.Map;
  * Zarządza pulą efektów audio
  */
 public class AudioEffectFactory {
-
     private static final Map<String, AudioEffectFlyweight> effectCache = new HashMap<>();
     private static final LoggerSingleton logger = LoggerSingleton.getInstance();
 
@@ -18,75 +19,44 @@ public class AudioEffectFactory {
         initializeEffects();
     }
 
-    // Pobranie efektu z cache
     public static AudioEffectFlyweight getEffect(String effectName) {
         String key = effectName.toLowerCase();
 
         if (effectCache.containsKey(key)) {
-            logger.log("[EFFECT-FLY] Pobranie z cache: " + effectName);
+            logCacheHit(effectName);
             return effectCache.get(key);
         }
 
-        logger.log("[EFFECT-FLY] Efekt nie znaleziony: " + effectName);
-        return null;
+        throw new IllegalArgumentException("Nieznany efekt: " + effectName + ". Dostępne: " + effectCache.keySet());
     }
 
-    // Inicjalizacja wspólnych efektów
+    private static void logCacheHit(String effectName) {
+        logger.log("[EFFECT-FLY] Pobranie z cache: " + effectName);
+    }
+
     private static void initializeEffects() {
-        effectCache.put("echo", new AudioEffectFlyweight(
-                "Echo",
-                "echo",
-                0.8f,
-                50,
-                "PRESET_ECHO_STANDARD"
-        ));
+        addEffect(new AudioEffectSpec("echo", "Echo", "echo", 0.8f, 50, "PRESET_ECHO_STANDARD"));
+        addEffect(new AudioEffectSpec("reverb", "Reverb", "reverb", 0.6f, 200, "PRESET_REVERB_HALL"));
+        addEffect(new AudioEffectSpec("pitch_correction", "Pitch Correction", "pitch", 1.0f, 0, "PRESET_AUTO_TUNE"));
+        addEffect(new AudioEffectSpec("distortion", "Distortion", "distortion", 0.5f, 0, "PRESET_MILD_DISTORTION"));
+        addEffect(new AudioEffectSpec("chorus", "Chorus", "chorus", 0.7f, 30, "PRESET_CHORUS_LIGHT"));
 
-        effectCache.put("reverb", new AudioEffectFlyweight(
-                "Reverb",
-                "reverb",
-                0.6f,
-                200,
-                "PRESET_REVERB_HALL"
-        ));
-
-        effectCache.put("pitch_correction", new AudioEffectFlyweight(
-                "Pitch Correction",
-                "pitch",
-                1.0f,
-                0,
-                "PRESET_AUTO_TUNE"
-        ));
-
-        effectCache.put("distortion", new AudioEffectFlyweight(
-                "Distortion",
-                "distortion",
-                0.5f,
-                0,
-                "PRESET_MILD_DISTORTION"
-        ));
-
-        effectCache.put("chorus", new AudioEffectFlyweight(
-                "Chorus",
-                "chorus",
-                0.7f,
-                30,
-                "PRESET_CHORUS_LIGHT"
-        ));
-
-        logger.log("[EFFECT-FLY] ✓ Zainicjalizowano 5 efektów");
+        logger.log("[EFFECT-FLY] ✓ Zainicjalizowano " + effectCache.size() + " efektów");
     }
 
-    // Pobranie liczby efektów w cache
-    public static int getCacheSize() {
-        return effectCache.size();
+    private static void addEffect(AudioEffectSpec spec) {
+        effectCache.put(spec.getKey(), new AudioEffectFlyweight(
+                spec.getName(), spec.getType(), spec.getIntensity(),
+                spec.getDelay(), spec.getPreset()
+        ));
     }
 
-    // Wyświetlenie dostępnych efektów
+    public static int getCacheSize() { return effectCache.size(); }
+
     public static void printAvailableEffects() {
         logger.log("[EFFECT-FLY] === Dostępne Efekty ===");
         for (String key : effectCache.keySet()) {
-            AudioEffectFlyweight effect = effectCache.get(key);
-            logger.log("[EFFECT-FLY] " + effect.getEffectName() + " - " + effect);
+            logger.log("[EFFECT-FLY] " + effectCache.get(key));
         }
     }
 }

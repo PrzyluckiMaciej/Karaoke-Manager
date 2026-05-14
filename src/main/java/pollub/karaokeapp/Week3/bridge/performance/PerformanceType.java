@@ -19,5 +19,22 @@ public abstract class PerformanceType {
 
     public abstract Performance createPerformance(Song song, List<User> participants);
     public abstract String getTypeDescription();
+
+    protected void validateParticipantCount(List<User> participants, int expected, String typeName) {
+        if (participants.size() != expected) {
+            throw new IllegalArgumentException(
+                    typeName + " wymaga " + expected + " uczestnika/uczestników!"
+            );
+        }
+    }
+
+    protected int calculateAverageLevel(List<User> participants) {
+        return participants.stream()
+                .mapToInt(User::getLevel)
+                .sum() / participants.size();
+    }
+
+    protected abstract int getBaseScore();
+    protected abstract int getExpectedParticipants();
 }
 // Koniec, Tydzień 3, Wzorzec Bridge 1

@@ -15,14 +15,25 @@ public class FilteredPlaylistDecorator extends PlaylistDecorator {
 
     public FilteredPlaylistDecorator(Playlist decoratedPlaylist, String allowedGenre) {
         super(decoratedPlaylist);
+        validateAllowedGenre(allowedGenre);
         this.allowedGenre = allowedGenre;
+    }
+
+    private void validateAllowedGenre(String genre) {
+        if (genre == null || genre.trim().isEmpty()) {
+            throw new IllegalArgumentException("Allowed genre cannot be null or empty");
+        }
     }
 
     @Override
     public List<Song> getSongs() {
         return decoratedPlaylist.getSongs().stream()
-                .filter(song -> song.getGenre().equalsIgnoreCase(allowedGenre))
+                .filter(this::hasAllowedGenre)
                 .collect(Collectors.toList());
+    }
+
+    private boolean hasAllowedGenre(Song song) {
+        return song.getGenre().equalsIgnoreCase(allowedGenre);
     }
 
     @Override

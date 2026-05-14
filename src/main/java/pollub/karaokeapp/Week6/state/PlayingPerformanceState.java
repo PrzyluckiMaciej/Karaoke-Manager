@@ -1,5 +1,6 @@
 package pollub.karaokeapp.Week6.state;
 
+import pollub.karaokeapp.Week6.exception.IllegalPerformanceStateException;
 import pollub.karaokeapp.model.performance.Performance;
 
 /**
@@ -10,7 +11,9 @@ public class PlayingPerformanceState implements PerformanceState {
 
     @Override
     public void play(Performance performance) {
-        System.out.println("[STATE-PLAYING] Już gramy! Nie można grać ponownie.");
+        throw new IllegalPerformanceStateException(
+                "Wykonanie już trwa! Nie można rozpocząć ponownie."
+        );
     }
 
     @Override
@@ -31,4 +34,3 @@ public class PlayingPerformanceState implements PerformanceState {
         return "PLAYING";
     }
 }
-// Koniec, Tydzień 6, Wzorzec State 2

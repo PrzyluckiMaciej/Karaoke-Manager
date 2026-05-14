@@ -13,8 +13,18 @@ public class ExperienceBoostDecorator extends UserDecorator {
 
     public ExperienceBoostDecorator(User decoratedUser, double pointMultiplier, String boostReason) {
         super(decoratedUser);
+        validateBoostParameters(pointMultiplier, boostReason);
         this.pointMultiplier = pointMultiplier;
         this.boostReason = boostReason;
+    }
+
+    private void validateBoostParameters(double multiplier, String reason) {
+        if (multiplier <= 0) {
+            throw new IllegalArgumentException("Point multiplier must be positive");
+        }
+        if (reason == null || reason.trim().isEmpty()) {
+            throw new IllegalArgumentException("Boost reason cannot be null or empty");
+        }
     }
 
     @Override

@@ -1,6 +1,7 @@
 package pollub.karaokeapp.Week5.memento.user;
 
 import pollub.karaokeapp.Week2.singleton.LoggerSingleton;
+import pollub.karaokeapp.Week5.memento.EmptyHistoryException;
 import pollub.karaokeapp.model.user.User;
 
 import java.util.ArrayDeque;
@@ -24,52 +25,68 @@ public class UserCaretaker {
         this.user = user;
     }
 
-    /** Zapis aktualnego stanu na stos historii */
     public void save() {
-        UserMemento memento = new UserMemento(user.getNickname(), user.getLevel(), user.getPoints());
+        UserMemento memento = createMemento();
         history.push(memento);
+        logSave(memento);
+    }
+
+    public void saveCheckpoint(String checkpointName) {
+        UserMemento memento = createMemento();
+        checkpoints.put(checkpointName, memento);
+        logCheckpoint(checkpointName, memento);
+    }
+
+    private UserMemento createMemento() {
+        return new UserMemento(user.getNickname(), user.getLevel(), user.getPoints());
+    }
+
+    private void logSave(UserMemento memento) {
         logger.log("[USER-MEMENTO] Zapisano stan: " + memento);
     }
 
-    /** Zapis jako nazwany punkt kontrolny */
-    public void saveCheckpoint(String checkpointName) {
-        UserMemento memento = new UserMemento(user.getNickname(), user.getLevel(), user.getPoints());
-        checkpoints.put(checkpointName, memento);
+    private void logCheckpoint(String checkpointName, UserMemento memento) {
         logger.log("[USER-MEMENTO] Checkpoint '" + checkpointName + "': " + memento);
     }
 
-    /** Cofnięcie do poprzedniego stanu ze stosu */
-    public boolean undo() {
+    public void undo() throws EmptyHistoryException {
         if (history.isEmpty()) {
-            logger.log("[USER-MEMENTO] Brak historii do cofnięcia");
-            return false;
+            throw new EmptyHistoryException("Brak historii do cofnięcia");
         }
         UserMemento memento = history.pop();
-        restore(memento);
-        logger.log("[USER-MEMENTO] Przywrócono stan: " + memento);
-        return true;
+        restoreFromMemento(memento);
+        logRestore(memento);
     }
 
-    /** Przywrócenie do nazwanego punktu kontrolnego */
-    public boolean restoreCheckpoint(String checkpointName) {
+    public void restoreCheckpoint(String checkpointName) throws IllegalArgumentException {
         UserMemento memento = checkpoints.get(checkpointName);
         if (memento == null) {
-            logger.log("[USER-MEMENTO] Nie znaleziono checkpointu: " + checkpointName);
-            return false;
+            throw new IllegalArgumentException("Nie znaleziono checkpointu: " + checkpointName);
         }
-        restore(memento);
-        logger.log("[USER-MEMENTO] Przywrócono checkpoint '" + checkpointName + "': " + memento);
-        return true;
+        restoreFromMemento(memento);
+        logCheckpointRestore(checkpointName, memento);
     }
 
-    /** Przywrócenie do konkretnej migawki */
-    private void restore(UserMemento memento) {
+    private void restoreFromMemento(UserMemento memento) {
         user.setNickname(memento.getNickname());
         user.setLevel(memento.getLevel());
         user.setPoints(memento.getPoints());
     }
 
-    public int getHistorySize()           { return history.size(); }
-    public int getCheckpointCount()       { return checkpoints.size(); }
+    private void logRestore(UserMemento memento) {
+        logger.log("[USER-MEMENTO] Przywrócono stan: " + memento);
+    }
+
+    private void logCheckpointRestore(String checkpointName, UserMemento memento) {
+        logger.log("[USER-MEMENTO] Przywrócono checkpoint '" + checkpointName + "': " + memento);
+    }
+
+    public int getHistorySize() {
+        return history.size();
+    }
+
+    public int getCheckpointCount() {
+        return checkpoints.size();
+    }
 }
 // Koniec, Tydzień 5, Wzorzec Memento 4 (Caretaker)

@@ -1,5 +1,6 @@
 package pollub.karaokeapp.Week3.bridge.lyrics;
 
+import pollub.karaokeapp.Week3.bridge.constants.BridgeConstants;
 import pollub.karaokeapp.model.song.Song;
 import java.util.List;
 
@@ -7,10 +8,11 @@ import java.util.List;
  * Tydzień 3, Wzorzec Bridge 3
  * Konkretna implementacja - styl karaoke z podświetlaniem sylab
  */
+// Poprawiony KaraokeStyleDisplay
 public class KaraokeStyleDisplay extends LyricsDisplay {
 
-    private boolean showTranslation;
-    private String backgroundColor;
+    private final boolean showTranslation;
+    private final String backgroundColor;
 
     public KaraokeStyleDisplay(LyricsSource lyricsSource, boolean showTranslation, String backgroundColor) {
         super(lyricsSource);
@@ -20,18 +22,23 @@ public class KaraokeStyleDisplay extends LyricsDisplay {
 
     @Override
     public void showLyrics(Song song) {
-        List<String> lines = lyricsSource.getLyricsLines(song);
-        System.out.println("🎤 Tryb KARAOKE (tło: " + backgroundColor + ")");
-        System.out.println("   Źródło: " + lyricsSource.getSourceType());
+        printHeader("🎤", "Tryb KARAOKE (tło: " + backgroundColor + ")", lyricsSource.getSourceType());
 
+        List<String> lines = getLyricsLines(song);
         for (int i = 0; i < lines.size(); i++) {
-            String line = lines.get(i);
-            System.out.println("   ⚫ " + line);
-
-            if (showTranslation && i % 2 == 0) {
-                System.out.println("   🔵 [Tłumaczenie: " + line.toUpperCase() + "]");
-            }
+            printLine("⚫", lines.get(i), false);
+            displayTranslationIfNeeded(i, lines.get(i));
         }
+    }
+
+    private void displayTranslationIfNeeded(int lineIndex, String originalLine) {
+        if (showTranslation && shouldShowTranslation(lineIndex)) {
+            printLine("🔵", "[Tłumaczenie: " + originalLine.toUpperCase() + "]", false);
+        }
+    }
+
+    private boolean shouldShowTranslation(int lineIndex) {
+        return lineIndex % BridgeConstants.TRANSLATION_LINE_MODULO == 0;
     }
 
     @Override
