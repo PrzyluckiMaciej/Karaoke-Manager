@@ -5,6 +5,7 @@ import pollub.karaokeapp.Week2.builder.user.UserBuilder;
 import pollub.karaokeapp.Week2.singleton.LoggerSingleton;
 import pollub.karaokeapp.Week10.functional.*;
 import pollub.karaokeapp.model.performance.Performance;
+import pollub.karaokeapp.model.playlist.Playlist;
 import pollub.karaokeapp.model.song.Song;
 import pollub.karaokeapp.model.user.User;
 
@@ -12,8 +13,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.OptionalInt;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 public class Week10_Presentation {
@@ -43,6 +46,7 @@ public class Week10_Presentation {
         List<Song> songs = buildSampleSongs();
         List<User> users = buildSampleUsers();
         List<Performance> performances = buildSamplePerformances(songs, users);
+        List<Playlist> playlists = buildSamplePlaylists(songs);
 
         // --- Interfejs funkcyjny 1: SongRatingFunction ---
         System.out.println("\n--- SongRatingFunction (interfejs funkcyjny 1) ---");
@@ -121,6 +125,36 @@ public class Week10_Presentation {
             System.out.println("  " + u.getNickname() + " (posiadane: " + u.getPoints() + ") -> " + accumulatingCalculator.calculate(u, basePoints) + " pkt");
         }
 
+        // --- Interfejs funkcyjny 4: PlaylistSummary ---
+        System.out.println("\n--- PlaylistSummary (interfejs funkcyjny 4) ---");
+
+        // Implementacja klasowa
+        PlaylistSummary detailedSummary = new DetailedPlaylistSummary();
+        System.out.println("Implementacja klasowa (DetailedPlaylistSummary):");
+        for (Playlist pl : playlists) {
+            System.out.println("  " + detailedSummary.summarize(pl));
+        }
+
+        // Implementacja przez wyrażenie lambda — zwięzły format
+        PlaylistSummary shortSummary = playlist ->
+                playlist.getName() + " (" + playlist.getSongs().size() + " piosenek)";
+        System.out.println("Wyrażenie lambda (zwięzły format):");
+        for (Playlist pl : playlists) {
+            System.out.println("  " + shortSummary.summarize(pl));
+        }
+
+        // Wyrażenie lambda blokowa — lista tytułów piosenek w jednym stringu
+        PlaylistSummary trackListSummary = playlist -> {
+            String tracks = playlist.getSongs().stream()
+                    .map(s -> "\"" + s.getTitle() + "\"")
+                    .collect(Collectors.joining(", "));
+            return playlist.getName() + " -> [" + tracks + "]";
+        };
+        System.out.println("Wyrażenie lambda (lista tytułów):");
+        for (Playlist pl : playlists) {
+            System.out.println("  " + trackListSummary.summarize(pl));
+        }
+
         System.out.println("--------------------------------------------------------------------------------\n");
     }
 
@@ -133,6 +167,7 @@ public class Week10_Presentation {
         List<Song> songs = buildSampleSongs();
         List<User> users = buildSampleUsers();
         List<Performance> performances = buildSamplePerformances(songs, users);
+        List<Playlist> playlists = buildSamplePlaylists(songs);
 
         // --- Kolekcja 1: List<Song> ---
         System.out.println("\n--- Kolekcja 1: List<Song> ---");
@@ -206,6 +241,40 @@ public class Week10_Presentation {
                 .distinct()
                 .sorted()
                 .forEach(name -> System.out.println("  " + name));
+
+        // --- Kolekcja 4: List<Playlist> ---
+        System.out.println("\n--- Kolekcja 4: List<Playlist> ---");
+
+        System.out.println("Playlisty z co najmniej 3 piosenkami posortowane wg liczby piosenek (malejąco):");
+        playlists.stream()
+                .filter(pl -> pl.getSongs().size() >= 3)
+                .sorted(Comparator.comparingInt((Playlist pl) -> pl.getSongs().size()).reversed())
+                .forEach(pl -> System.out.println("  \"" + pl.getName() + "\" - " + pl.getSongs().size() + " piosenek"));
+
+        System.out.println("Łączny czas trwania każdej playlisty:");
+        playlists.stream()
+                .map(pl -> {
+                    int total = pl.getSongs().stream().mapToInt(Song::getDuration).sum();
+                    return "\"" + pl.getName() + "\": " + total / 60 + " min " + total % 60 + " sek";
+                })
+                .forEach(summary -> System.out.println("  " + summary));
+
+        System.out.println("Wszystkie piosenki ze wszystkich playlist (bez powtórzeń, posortowane):");
+        playlists.stream()
+                .flatMap(pl -> pl.getSongs().stream())
+                .map(Song::getTitle)
+                .distinct()
+                .sorted()
+                .forEach(title -> System.out.println("  " + title));
+
+        System.out.println("Grupowanie playlist wg liczby piosenek (mała: <3, duża: >=3):");
+        Map<String, Long> playlistsBySize = playlists.stream()
+                .collect(Collectors.groupingBy(
+                        pl -> pl.getSongs().size() >= 3 ? "duża" : "mała",
+                        Collectors.counting()
+                ));
+        playlistsBySize.forEach((size, count) ->
+                System.out.println("  Playlista " + size + ": " + count));
 
         System.out.println("--------------------------------------------------------------------------------\n");
     }
@@ -291,6 +360,45 @@ public class Week10_Presentation {
                 .map(toUpperLabel)
                 .forEach(label -> System.out.println("  " + label));
 
+        // --- 4. przykład: BiFunction i UnaryOperator ---
+        System.out.println("\n--- BiFunction i UnaryOperator (4. przykład) ---");
+
+        List<User> users = buildSampleUsers();
+
+        // BiFunction<T, U, R> — przyjmuje dwa argumenty różnych typów, zwraca wynik
+        BiFunction<Song, User, String> matchReport =
+                (song, user) -> user.getNickname() + " śpiewa \"" + song.getTitle()
+                        + "\" [trudność: " + song.getDifficulty() + "/10]";
+
+        System.out.println("BiFunction<Song, User, String> — dopasowanie piosenki do użytkownika:");
+        for (int i = 0; i < Math.min(songs.size(), users.size()); i++) {
+            System.out.println("  " + matchReport.apply(songs.get(i), users.get(i)));
+        }
+
+        // BiFunction z andThen — łańcuchowanie z Function
+        BiFunction<Song, User, String> matchReportUpperCase = matchReport.andThen(String::toUpperCase);
+        System.out.println("BiFunction.andThen(toUpperCase) — wynik wersalikami:");
+        System.out.println("  " + matchReportUpperCase.apply(songs.get(0), users.get(0)));
+
+        // UnaryOperator<T> — szczególny przypadek Function<T, T> (ten sam typ wejścia i wyjścia)
+        UnaryOperator<String> addStars = label -> "*** " + label + " ***";
+        UnaryOperator<String> addBorder = label -> "| " + label + " |";
+
+        System.out.println("UnaryOperator<String> — dekorowanie etykiet:");
+        songs.stream()
+                .map(toDifficultyLabel)
+                .map(addStars)
+                .forEach(label -> System.out.println("  " + label));
+
+        // Łańcuchowanie dwóch UnaryOperator przez andThen (wynik: Function<String,String>)
+        Function<String, String> addStarsAndBorder = addStars.andThen(addBorder);
+        System.out.println("UnaryOperator.andThen(UnaryOperator) — gwiazdki i ramka:");
+        songs.stream()
+                .filter(isHardSong)
+                .map(toDifficultyLabel)
+                .map(addStarsAndBorder)
+                .forEach(label -> System.out.println("  " + label));
+
         System.out.println("--------------------------------------------------------------------------------\n");
     }
 
@@ -329,6 +437,28 @@ public class Week10_Presentation {
                 new Performance(songs.get(4), List.of(users.get(3)), 160),
                 new Performance(songs.get(5), List.of(users.get(4)), 340)
         );
+    }
+
+    private static List<Playlist> buildSamplePlaylists(List<Song> songs) {
+        Playlist rockClassics = new Playlist("Rock Classics");
+        rockClassics.addSong(songs.get(1)); // Bohemian Rhapsody
+        rockClassics.addSong(songs.get(3)); // Stairway to Heaven
+        rockClassics.addSong(songs.get(5)); // Fear of the Dark
+        rockClassics.addSong(songs.get(0)); // Numb
+
+        Playlist popHits = new Playlist("Pop Hits");
+        popHits.addSong(songs.get(2)); // Shape of You
+        popHits.addSong(songs.get(4)); // Blinding Lights
+
+        Playlist mixedVibes = new Playlist("Mixed Vibes");
+        mixedVibes.addSong(songs.get(0)); // Numb
+        mixedVibes.addSong(songs.get(2)); // Shape of You
+        mixedVibes.addSong(songs.get(6)); // Despacito
+
+        Playlist soloStage = new Playlist("Solo Stage");
+        soloStage.addSong(songs.get(6)); // Despacito
+
+        return List.of(rockClassics, popHits, mixedVibes, soloStage);
     }
 }
 //Koniec, Tydzień 10
